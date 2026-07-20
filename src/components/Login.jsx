@@ -37,9 +37,9 @@ export default function Login() {
       <div className="relative w-full max-w-sm">
         <div className="flex flex-col items-center">
           <span className="grid h-12 w-12 place-items-center rounded-2xl bg-accent-gradient text-xl font-black text-white shadow-[var(--shadow-glow)]">
-            F
+            M
           </span>
-          <h1 className="mt-3 text-2xl font-bold tracking-tight text-ink">Form</h1>
+          <h1 className="mt-3 text-2xl font-bold tracking-tight text-ink">Mogged</h1>
           <p className="mt-1 text-center text-sm text-muted">
             {modus === "anmelden"
               ? "Melde dich an, um deine Daten auf allen Geräten zu sehen."

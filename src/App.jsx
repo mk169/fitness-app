@@ -22,9 +22,9 @@ function Wortmarke() {
   return (
     <div className="flex items-center gap-2.5">
       <span className="grid h-9 w-9 place-items-center rounded-xl bg-accent-gradient text-base font-black text-white shadow-[var(--shadow-glow)]">
-        F
+        M
       </span>
-      <span className="text-lg font-bold tracking-tight text-ink">Form</span>
+      <span className="text-lg font-bold tracking-tight text-ink">Mogged</span>
     </div>
   )
 }
