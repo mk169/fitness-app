@@ -6,6 +6,7 @@ import { SPLITS, WOCHEN_KEYS, standardTage, tagesName, planTag, normEintrag } fr
 import { e1rm, verlaufVon, overloadVorschlag } from "../lib/training"
 import { useZiel } from "./ZielSeite"
 import Koerperkarte from "./Koerperkarte"
+import { Card, PageHeader, SectionTitle, Button, cx, labelCls } from "./ui"
 
 // Trainingsplan-Seite = Trainings-Zentrale: was wird heute trainiert
 // (mit Session-Start), Wochenplan-Übersicht und Fortschritts-Statistik.
@@ -27,7 +28,7 @@ function heutigerTagKey() {
   return WOCHEN_KEYS[(new Date().getDay() + 6) % 7]
 }
 
-export default function TrainingsplanSeite({ onBack, onZiel }) {
+export default function TrainingsplanSeite({ onZiel }) {
   const [wochenplan] = useStored("trainingsplanUebungen", LEER)
   const { profil } = useZiel()
   const [sessionAktiv, setSessionAktiv] = useState(false)
@@ -49,28 +50,18 @@ export default function TrainingsplanSeite({ onBack, onZiel }) {
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-10">
-      <button onClick={onBack} className="text-xs font-medium text-gray-400 transition-colors hover:text-gray-900">
-        ← Dashboard
-      </button>
-
-      <div className="mt-4 flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Trainingsplan</h1>
-          <p className="mt-1 text-sm text-gray-400">
-            {SPLITS[splitWahl]?.name} · {tageWahl.length}× / Woche – bearbeiten
-            in „Ziel &amp; Anpassung“.
-          </p>
-        </div>
-        {onZiel && (
-          <button
-            onClick={onZiel}
-            className="rounded-md border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 hover:border-gray-400"
-          >
-            Plan bearbeiten →
-          </button>
-        )}
-      </div>
+    <div>
+      <PageHeader
+        title="Trainingsplan"
+        subtitle={`${SPLITS[splitWahl]?.name} · ${tageWahl.length}× / Woche`}
+        right={
+          onZiel && (
+            <Button variant="subtle" onClick={onZiel}>
+              Plan bearbeiten →
+            </Button>
+          )
+        }
+      />
 
       <HeuteKarte
         eintraege={heuteEintraege}
@@ -99,23 +90,21 @@ function HeuteKarte({ eintraege, einheitName, onStart }) {
   }
 
   return (
-    <section className="mt-6 rounded-xl border-2 border-gray-900 bg-white p-5">
+    <section className="relative mt-6 overflow-hidden rounded-2xl border border-accent/30 bg-surface p-5 shadow-[var(--shadow-glow)]">
+      <div className="pointer-events-none absolute -right-16 -top-20 h-48 w-48 rounded-full bg-accent/20 blur-3xl" />
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-faint">
             Heute{einheitName && eintraege.length > 0 ? ` · ${einheitName}` : ""}
           </p>
-          <p className="mt-0.5 text-lg font-semibold text-gray-900">
+          <p className="mt-0.5 text-lg font-semibold text-ink">
             {eintraege.length === 0 ? "Ruhetag" : `${abgehakt}/${eintraege.length} Übungen erledigt`}
           </p>
         </div>
         {eintraege.length > 0 && (
-          <button
-            onClick={onStart}
-            className="rounded-md bg-gray-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-gray-700"
-          >
+          <Button onClick={onStart} className="px-5 py-2.5">
             ▶ Session starten
-          </button>
+          </Button>
         )}
       </div>
 
@@ -126,17 +115,17 @@ function HeuteKarte({ eintraege, einheitName, onStart }) {
             if (!u) return null
             const check = !!tages.uebungen?.[e.id]
             return (
-              <li key={e.id} className="flex items-center gap-2.5 border-b border-gray-50 py-1.5">
+              <li key={e.id} className="flex items-center gap-2.5 border-b border-white/[0.06] py-1.5">
                 <input
                   type="checkbox"
                   checked={check}
                   onChange={() => toggle(e.id)}
-                  className="h-4 w-4 accent-gray-900"
+                  className="h-4 w-4 accent-[var(--color-accent)]"
                 />
-                <span className={`flex-1 text-sm ${check ? "text-gray-300 line-through" : "text-gray-800"}`}>
+                <span className={cx("flex-1 text-sm", check ? "text-faint line-through" : "text-ink/90")}>
                   {u.name}
                 </span>
-                <span className="text-xs tabular-nums text-gray-400">
+                <span className="text-xs tabular-nums text-muted">
                   {e.saetze}×{e.wdh}{e.gewicht > 0 ? ` · ${e.gewicht} kg` : ""}
                 </span>
               </li>
@@ -152,7 +141,7 @@ function HeuteKarte({ eintraege, einheitName, onStart }) {
 function Wochenplan({ wochenplan, splitWahl, tageWahl, tagKey }) {
   return (
     <section className="mt-8">
-      <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-400">Wochenplan</h2>
+      <SectionTitle>Wochenplan</SectionTitle>
       <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
         {WOCHENTAGE.map((t) => {
           const eintraege = planTag(wochenplan, t.key)
@@ -162,34 +151,41 @@ function Wochenplan({ wochenplan, splitWahl, tageWahl, tagKey }) {
           return (
             <div
               key={t.key}
-              className={`rounded-xl border bg-white p-3.5 ${istHeute ? "border-gray-900" : "border-gray-200"}`}
+              className={cx(
+                "rounded-xl border bg-surface p-3.5",
+                istHeute ? "border-accent/60" : "border-white/[0.06]"
+              )}
             >
               <div className="flex items-center justify-between">
-                <span className={`text-xs font-semibold uppercase tracking-wide ${istHeute ? "text-gray-900" : "text-gray-400"}`}>
+                <span className={cx(
+                  "text-xs font-semibold uppercase tracking-wide",
+                  istHeute ? "text-accent-soft" : "text-faint"
+                )}>
                   {t.name}
                 </span>
                 {modus && (
                   <span
-                    className={`rounded-full px-1.5 py-0.5 text-[10px] font-medium ${
+                    className={cx(
+                      "rounded-full px-1.5 py-0.5 text-[10px] font-medium",
                       modus === "Cali"
-                        ? "bg-emerald-50 text-emerald-700"
+                        ? "bg-emerald-500/15 text-emerald-300"
                         : modus === "Mix"
-                          ? "bg-violet-50 text-violet-700"
-                          : "bg-blue-50 text-blue-700"
-                    }`}
+                          ? "bg-violet-500/15 text-violet-300"
+                          : "bg-indigo-500/15 text-indigo-300"
+                    )}
                   >
                     {modus}
                   </span>
                 )}
               </div>
               {eintraege.length === 0 ? (
-                <p className="mt-1.5 text-xs text-gray-300">Ruhetag</p>
+                <p className="mt-1.5 text-xs text-faint">Ruhetag</p>
               ) : (
                 <>
-                  <p className="mt-1 text-sm font-medium text-gray-900">
+                  <p className="mt-1 text-sm font-medium text-ink">
                     {tagesName(splitWahl, tageWahl, t.key) ?? "Training"} · {eintraege.length} Übungen
                   </p>
-                  <p className="mt-1 truncate text-xs text-gray-400">
+                  <p className="mt-1 truncate text-xs text-muted">
                     {eintraege.map((e) => uebungVon(e.id)?.name).filter(Boolean).join(", ")}
                   </p>
                 </>
@@ -291,42 +287,39 @@ function SessionAnsicht({ eintraege, profil, einheitName, onEnde }) {
 
   if (phase === "setup") {
     return (
-      <div className="mx-auto max-w-5xl px-6 py-10">
-        <button onClick={onEnde} className="text-xs font-medium text-gray-400 hover:text-gray-900">
+      <div>
+        <button onClick={onEnde} className="text-xs font-medium text-muted transition-colors hover:text-ink">
           ← Abbrechen
         </button>
-        <h1 className="mt-4 text-2xl font-semibold tracking-tight">
+        <h1 className="mt-4 text-2xl font-bold tracking-tight text-ink">
           Session{einheitName ? ` · ${einheitName}` : ""}
         </h1>
-        <p className="mt-1 text-sm text-gray-400">
+        <p className="mt-1 text-sm text-muted">
           Timer einstellen, dann geht’s los. {eintraege.length} Übungen stehen an.
         </p>
 
-        <div className="mt-6 max-w-sm rounded-xl border border-gray-200 bg-white p-5">
-          <label className="flex flex-col text-xs text-gray-500">
+        <Card className="mt-6 max-w-sm p-5">
+          <label className={labelCls}>
             Dauer (Minuten)
             <input
               type="number" min="10" step="5" value={minuten}
               onChange={(e) => setMinuten(e.target.value)}
-              className="mt-1 rounded-md border border-gray-200 px-3 py-3 text-center text-2xl font-semibold text-gray-900 outline-none focus:border-gray-900"
+              className="mt-1 w-full rounded-lg border border-white/10 bg-surface-2 px-3 py-3 text-center text-2xl font-bold tabular-nums text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/30"
             />
           </label>
-          <button
-            onClick={starten}
-            className="mt-4 w-full rounded-md bg-gray-900 py-3 text-sm font-semibold text-white hover:bg-gray-700"
-          >
+          <Button onClick={starten} className="mt-4 w-full py-3">
             ▶ Los geht’s
-          </button>
-        </div>
+          </Button>
+        </Card>
 
         <ul className="mt-6 max-w-sm space-y-1.5">
           {eintraege.map((e) => {
             const u = uebungVon(e.id)
             return u ? (
-              <li key={e.id} className="flex items-center gap-2 text-sm text-gray-600">
-                <span className="h-1.5 w-1.5 rounded-full bg-gray-300" />
+              <li key={e.id} className="flex items-center gap-2 text-sm text-muted">
+                <span className="h-1.5 w-1.5 rounded-full bg-accent/60" />
                 <span className="flex-1">{u.name}</span>
-                <span className="text-xs tabular-nums text-gray-400">
+                <span className="text-xs tabular-nums text-faint">
                   {e.saetze}×{e.wdh}{e.gewicht > 0 ? ` · ${e.gewicht} kg` : ""}
                 </span>
               </li>
@@ -338,35 +331,30 @@ function SessionAnsicht({ eintraege, profil, einheitName, onEnde }) {
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-10">
+    <div>
       {/* Timer-Kopf */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-faint">
             Session{einheitName ? ` · ${einheitName}` : ""}
             {pausenRest !== null && " · Pause"}
           </p>
-          <p className={`text-4xl font-semibold tabular-nums tracking-tight ${restSek === 0 ? "text-rose-600" : "text-gray-900"}`}>
+          <p className={cx(
+            "text-5xl font-bold tabular-nums tracking-tight",
+            restSek === 0 ? "text-rose-400" : "text-ink"
+          )}>
             {restSek === 0 ? "Zeit um!" : zeit}
           </p>
         </div>
         <div className="flex gap-2">
-          <button
-            onClick={pauseToggle}
-            className="rounded-md border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:border-gray-400"
-          >
+          <Button variant="subtle" onClick={pauseToggle}>
             {pausenRest !== null ? "▶ Weiter" : "❚❚ Pause"}
-          </button>
-          <button
-            onClick={onEnde}
-            className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700"
-          >
-            Session beenden
-          </button>
+          </Button>
+          <Button onClick={onEnde}>Session beenden</Button>
         </div>
       </div>
-      <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-gray-100">
-        <div className="h-full rounded-full bg-gray-900 transition-all" style={{ width: `${fortschritt * 100}%` }} />
+      <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/10">
+        <div className="h-full rounded-full bg-accent-gradient transition-all" style={{ width: `${fortschritt * 100}%` }} />
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_300px]">
@@ -383,27 +371,29 @@ function SessionAnsicht({ eintraege, profil, einheitName, onEnde }) {
                 <li key={e.id}>
                   <button
                     onClick={() => waehleUebung(e.id)}
-                    className={`flex w-full items-center gap-3 rounded-lg border-2 px-3 py-2.5 text-left transition-colors ${
-                      istAktiv ? "border-gray-900 bg-white" : "border-gray-200 bg-white hover:border-gray-400"
-                    }`}
+                    className={cx(
+                      "flex w-full items-center gap-3 rounded-xl border px-3 py-2.5 text-left transition-colors",
+                      istAktiv ? "border-accent/60 bg-accent/10" : "border-white/[0.06] bg-surface hover:border-white/25"
+                    )}
                   >
                     <input
                       type="checkbox"
                       checked={check}
                       onChange={(ev) => hakeAb(e.id, ev.target.checked)}
                       onClick={(ev) => ev.stopPropagation()}
-                      className="h-4 w-4 accent-gray-900"
+                      className="h-4 w-4 accent-[var(--color-accent)]"
                     />
-                    <span className={`flex-1 text-sm font-medium ${check ? "text-gray-300 line-through" : "text-gray-900"}`}>
+                    <span className={cx("flex-1 text-sm font-medium", check ? "text-faint line-through" : "text-ink")}>
                       {u.name}
                     </span>
-                    <span className="text-xs tabular-nums text-gray-400">
+                    <span className="text-xs tabular-nums text-muted">
                       {e.wdh} Wdh.{e.gewicht > 0 ? ` @ ${e.gewicht} kg` : ""}
                     </span>
                     <span
-                      className={`rounded-full px-2 py-0.5 text-[10px] font-medium tabular-nums ${
-                        saetze >= e.saetze ? "bg-emerald-50 text-emerald-700" : "bg-gray-100 text-gray-500"
-                      }`}
+                      className={cx(
+                        "rounded-full px-2 py-0.5 text-[10px] font-medium tabular-nums",
+                        saetze >= e.saetze ? "bg-emerald-500/15 text-emerald-300" : "bg-white/10 text-muted"
+                      )}
                     >
                       {saetze}/{e.saetze} Sätze
                     </span>
@@ -415,11 +405,11 @@ function SessionAnsicht({ eintraege, profil, einheitName, onEnde }) {
 
           {/* Satz-Logging für die aktive Übung */}
           {uebung && (
-            <div className="mt-5 rounded-xl border border-gray-200 bg-white p-4">
+            <Card className="mt-5 p-4">
               <div className="flex flex-wrap items-baseline justify-between gap-2">
-                <p className="text-sm font-semibold text-gray-900">{uebung.name}</p>
+                <p className="text-sm font-semibold text-ink">{uebung.name}</p>
                 {ziel && (
-                  <p className="text-xs text-gray-400">
+                  <p className="text-xs text-muted">
                     Plan: {ziel.saetze} × {ziel.wdh}
                     {ziel.gewicht > 0 ? ` @ ${ziel.gewicht} kg` : ""} ·{" "}
                     {heutigeSaetze.length}/{ziel.saetze} erledigt
@@ -427,48 +417,43 @@ function SessionAnsicht({ eintraege, profil, einheitName, onEnde }) {
                 )}
               </div>
               {vorschlag && (
-                <p className="mt-1 rounded-md bg-amber-50 px-2.5 py-1.5 text-xs text-amber-700">
+                <p className="mt-1 rounded-lg bg-amber-500/15 px-2.5 py-1.5 text-xs text-amber-300">
                   ↗ {vorschlag.text}
                 </p>
               )}
               <form onSubmit={satzSpeichern} className="mt-3 flex flex-wrap items-end gap-2">
-                <label className="flex flex-col text-xs text-gray-500">
+                <label className={labelCls}>
                   Gewicht (kg)
                   <input
                     type="number" min="0" step="0.5" value={gewicht}
                     onChange={(e) => setGewicht(e.target.value)}
                     placeholder={uebung.geraet === "Körpergewicht" ? "0 = Körper" : ""}
-                    className="mt-1 w-28 rounded-md border border-gray-200 px-3 py-2 text-sm text-gray-900 outline-none focus:border-gray-900"
+                    className="mt-1 w-28 rounded-lg border border-white/10 bg-surface-2 px-3 py-2 text-sm text-ink outline-none placeholder:text-faint focus:border-accent focus:ring-2 focus:ring-accent/30"
                   />
                 </label>
-                <label className="flex flex-col text-xs text-gray-500">
+                <label className={labelCls}>
                   Wdh.
                   <input
                     type="number" min="1" value={wdh}
                     onChange={(e) => setWdh(e.target.value)}
-                    className="mt-1 w-20 rounded-md border border-gray-200 px-3 py-2 text-sm text-gray-900 outline-none focus:border-gray-900"
+                    className="mt-1 w-20 rounded-lg border border-white/10 bg-surface-2 px-3 py-2 text-sm text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/30"
                   />
                 </label>
-                <button
-                  type="submit"
-                  className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700"
-                >
-                  + Satz
-                </button>
+                <Button type="submit">+ Satz</Button>
               </form>
 
               {heutigeSaetze.length > 0 && (
                 <ul className="mt-3 space-y-1">
                   {heutigeSaetze.map((s, i) => (
-                    <li key={s.id} className="group flex items-center gap-3 text-sm text-gray-700">
-                      <span className="w-14 text-xs text-gray-400">Satz {i + 1}</span>
-                      <span className="flex-1">
+                    <li key={s.id} className="group flex items-center gap-3 text-sm text-muted">
+                      <span className="w-14 text-xs text-faint">Satz {i + 1}</span>
+                      <span className="flex-1 text-ink/90">
                         {s.gewicht > 0 ? `${s.gewicht} kg × ` : ""}{s.wdh} Wdh.
-                        <span className="ml-2 text-xs text-gray-400">e1RM {e1rm(s.gewicht, s.wdh)}</span>
+                        <span className="ml-2 text-xs text-faint">e1RM {e1rm(s.gewicht, s.wdh)}</span>
                       </span>
                       <button
                         onClick={() => setLog((alt) => alt.filter((x) => x.id !== s.id))}
-                        className="text-gray-300 opacity-0 transition-opacity hover:text-red-500 group-hover:opacity-100"
+                        className="text-faint opacity-0 transition-opacity hover:text-rose-400 group-hover:opacity-100"
                       >
                         ×
                       </button>
@@ -476,30 +461,30 @@ function SessionAnsicht({ eintraege, profil, einheitName, onEnde }) {
                   ))}
                 </ul>
               )}
-            </div>
+            </Card>
           )}
         </div>
 
         {/* Männchen: zeigt die Muskeln der aktiven Übung */}
         <div className="lg:sticky lg:top-6 lg:self-start">
-          <div className="rounded-xl border border-gray-200 bg-white p-4">
+          <Card className="p-4">
             <Koerperkarte aktiv={muskeln} />
-            <p className="mt-1 text-center text-xs text-gray-400">
+            <p className="mt-1 text-center text-xs text-muted">
               {uebung ? `${uebung.name} trainiert:` : "Übung wählen"}
             </p>
             <div className="mt-1.5 flex flex-wrap justify-center gap-1">
               {uebung?.muskeln.map((m) => (
-                <span key={m} className="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-medium text-blue-700">
+                <span key={m} className="rounded-full bg-accent/15 px-2 py-0.5 text-[10px] font-medium text-accent-soft">
                   {MUSKELGRUPPEN[m]?.name}
                 </span>
               ))}
               {(uebung?.sekundaer ?? []).map((m) => (
-                <span key={m} className="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] text-gray-500">
+                <span key={m} className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] text-muted">
                   {MUSKELGRUPPEN[m]?.name}
                 </span>
               ))}
             </div>
-          </div>
+          </Card>
         </div>
       </div>
     </div>
@@ -532,53 +517,54 @@ function ProgressStatistik({ wochenplan }) {
 
   return (
     <section className="mt-8">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-400">
-          Fortschritt
-        </h2>
-        {auswahlIds.length > 0 && (
-          <select
-            value={aktivId ?? ""}
-            onChange={(e) => setGewaehlt(e.target.value)}
-            className="rounded-md border border-gray-200 bg-white px-2.5 py-1.5 text-sm text-gray-900 outline-none focus:border-gray-900"
-          >
-            {auswahlIds.map((id) => {
-              const u = uebungVon(id)
-              return u ? (
-                <option key={id} value={id}>
-                  {u.name}{geloggt.includes(id) ? "" : " (noch kein Log)"}
-                </option>
-              ) : null
-            })}
-          </select>
-        )}
-      </div>
+      <SectionTitle
+        right={
+          auswahlIds.length > 0 && (
+            <select
+              value={aktivId ?? ""}
+              onChange={(e) => setGewaehlt(e.target.value)}
+              className="rounded-lg border border-white/10 bg-surface-2 px-2.5 py-1.5 text-sm text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/30"
+            >
+              {auswahlIds.map((id) => {
+                const u = uebungVon(id)
+                return u ? (
+                  <option key={id} value={id}>
+                    {u.name}{geloggt.includes(id) ? "" : " (noch kein Log)"}
+                  </option>
+                ) : null
+              })}
+            </select>
+          )
+        }
+      >
+        Fortschritt
+      </SectionTitle>
 
-      <div className="mt-3 rounded-xl border border-gray-200 bg-white p-5">
+      <Card className="mt-3 p-5">
         {verlauf.length === 0 ? (
-          <p className="py-6 text-center text-sm text-gray-400">
+          <p className="py-6 text-center text-sm text-muted">
             Noch keine Sätze geloggt – starte oben eine Session und trage
             Gewicht &amp; Wiederholungen ein.
           </p>
         ) : (
           <>
-            <div className="flex flex-wrap gap-4 text-sm">
+            <div className="flex flex-wrap gap-6 text-sm">
               <div>
-                <p className="text-xs text-gray-400">Bestwert</p>
-                <p className="font-semibold text-gray-900">
+                <p className="text-xs text-faint">Bestwert</p>
+                <p className="font-semibold text-ink">
                   {Math.max(...verlauf.map((v) => v.best))} {einheit}
                 </p>
               </div>
               <div>
-                <p className="text-xs text-gray-400">Letzte Einheit</p>
-                <p className="font-semibold text-gray-900">
+                <p className="text-xs text-faint">Letzte Einheit</p>
+                <p className="font-semibold text-ink">
                   {letzter.best} {einheit} · {letzter.saetze.length} Sätze
                 </p>
               </div>
               {steigerung !== null && verlauf.length > 1 && (
                 <div>
-                  <p className="text-xs text-gray-400">Seit Beginn</p>
-                  <p className={`font-semibold ${steigerung >= 0 ? "text-emerald-600" : "text-rose-600"}`}>
+                  <p className="text-xs text-faint">Seit Beginn</p>
+                  <p className={cx("font-semibold", steigerung >= 0 ? "text-emerald-400" : "text-rose-400")}>
                     {steigerung > 0 ? "+" : ""}{steigerung} %
                   </p>
                 </div>
@@ -589,7 +575,7 @@ function ProgressStatistik({ wochenplan }) {
             </div>
           </>
         )}
-      </div>
+      </Card>
     </section>
   )
 }
@@ -598,7 +584,7 @@ function ProgressStatistik({ wochenplan }) {
 function Diagramm({ verlauf, einheit }) {
   if (verlauf.length < 2) {
     return (
-      <p className="text-xs text-gray-400">
+      <p className="text-xs text-muted">
         Nach der zweiten Einheit erscheint hier deine Fortschrittskurve.
       </p>
     )
@@ -623,32 +609,38 @@ function Diagramm({ verlauf, einheit }) {
 
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className="w-full">
+      <defs>
+        <linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.35" />
+          <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0" />
+        </linearGradient>
+      </defs>
       {/* Gitterlinien */}
       {[0.25, 0.5, 0.75].map((f) => (
         <line
           key={f}
           x1={P} x2={W - P}
           y1={P + f * (H - 2 * P)} y2={P + f * (H - 2 * P)}
-          stroke="#f1f5f9"
+          stroke="#ffffff" strokeOpacity="0.06"
         />
       ))}
       {/* Fläche unter der Kurve */}
       <polygon
         points={`${x(0)},${H - P} ${punkte} ${x(verlauf.length - 1)},${H - P}`}
-        fill="#3b82f6" opacity="0.07"
+        fill="url(#chartFill)"
       />
-      <polyline points={punkte} fill="none" stroke="#3b82f6" strokeWidth="2.5" strokeLinejoin="round" />
+      <polyline points={punkte} fill="none" stroke="#a5b4fc" strokeWidth="2.5" strokeLinejoin="round" />
       {verlauf.map((v, i) => (
-        <circle key={i} cx={x(i)} cy={y(v.best)} r={i === verlauf.length - 1 ? 5 : 3.5} fill="#3b82f6" />
+        <circle key={i} cx={x(i)} cy={y(v.best)} r={i === verlauf.length - 1 ? 5 : 3.5} fill="#a5b4fc" />
       ))}
       {/* Beschriftung: letzter Wert + Achsen-Enden */}
-      <text x={x(verlauf.length - 1)} y={y(verlauf[verlauf.length - 1].best) - 10} textAnchor="end" className="fill-gray-700" style={{ fontSize: 12, fontWeight: 600 }}>
+      <text x={x(verlauf.length - 1)} y={y(verlauf[verlauf.length - 1].best) - 10} textAnchor="end" fill="#f3f4f8" style={{ fontSize: 12, fontWeight: 600 }}>
         {verlauf[verlauf.length - 1].best} {einheit}
       </text>
-      <text x={P} y={H - 8} className="fill-gray-400" style={{ fontSize: 10 }}>
+      <text x={P} y={H - 8} fill="#6b7280" style={{ fontSize: 10 }}>
         {datumKurz(verlauf[0].datum)}
       </text>
-      <text x={W - P} y={H - 8} textAnchor="end" className="fill-gray-400" style={{ fontSize: 10 }}>
+      <text x={W - P} y={H - 8} textAnchor="end" fill="#6b7280" style={{ fontSize: 10 }}>
         {datumKurz(verlauf[verlauf.length - 1].datum)}
       </text>
     </svg>

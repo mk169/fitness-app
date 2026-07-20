@@ -10,6 +10,7 @@ import { WOCHEN_KEYS, SPLITS, tagesName, standardTage, normEintrag } from "../li
 import {
   konzeptVon, methodeVon, FARBEN, FASTEN_STANDARD, fastenStatus, aktivePhase,
 } from "../lib/ernaehrung"
+import { Card, SectionLink, cx } from "./ui"
 
 function begruessung() {
   const stunde = new Date().getHours()
@@ -21,13 +22,7 @@ function begruessung() {
 function Abschnitt({ titel, onOeffnen, children }) {
   return (
     <section className="mt-10">
-      <button
-        onClick={onOeffnen}
-        className="group flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-gray-400 transition-colors hover:text-gray-900"
-      >
-        {titel}
-        <span className="text-gray-300 transition-colors group-hover:text-gray-900">→</span>
-      </button>
+      <SectionLink onClick={onOeffnen}>{titel}</SectionLink>
       <div className="mt-3">{children}</div>
     </section>
   )
@@ -37,10 +32,10 @@ export default function Dashboard({ onNavigate }) {
   const { profil, plan } = useZiel()
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-10">
-      <p className="text-sm text-gray-400">{datumLang(heute())}</p>
-      <h1 className="mt-1 text-2xl font-semibold tracking-tight">
-        {begruessung()}, Matthias
+    <div>
+      <p className="text-sm text-muted">{datumLang(heute())}</p>
+      <h1 className="mt-1 text-3xl font-bold tracking-tight text-ink">
+        {begruessung()}, <span className="text-gradient">Matthias</span>
       </h1>
 
       {/* 1. Heute – mit dem Kalender verbundener Tagesblock zum Abhaken */}
@@ -145,21 +140,16 @@ function HeuteBlock({ profil, plan, onNavigate }) {
 
   return (
     <section className="mt-6">
-      <button
-        onClick={() => onNavigate("kalender")}
-        className="group flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-gray-400 transition-colors hover:text-gray-900"
-      >
-        Heute
-        <span className="text-gray-300 transition-colors group-hover:text-gray-900">→</span>
-      </button>
+      <SectionLink onClick={() => onNavigate("kalender")}>Heute</SectionLink>
 
-      <div className="mt-3 rounded-xl border-2 border-gray-900 bg-white px-5 py-2">
+      <div className="relative mt-3 overflow-hidden rounded-2xl border border-accent/30 bg-surface px-5 py-2 shadow-[var(--shadow-glow)]">
+        <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-accent/20 blur-3xl" />
         {zeilen.length === 0 ? (
-          <p className="py-4 text-center text-sm text-gray-400">
+          <p className="py-5 text-center text-sm text-muted">
             Heute steht nichts an – Kalender öffnen, um zu planen.
           </p>
         ) : (
-          <ul className="divide-y divide-gray-100">
+          <ul className="divide-y divide-white/[0.06]">
             {zeilen.map((z, i) => {
               const typ = EINTRAG_TYPEN[z.typ]
               const Zeile = z.onClick ? "button" : "div"
@@ -167,19 +157,22 @@ function HeuteBlock({ profil, plan, onNavigate }) {
                 <li key={i}>
                   <Zeile
                     onClick={z.onClick}
-                    className={`flex w-full items-center gap-3 py-2.5 text-left ${z.onClick ? "cursor-pointer" : ""}`}
+                    className={cx(
+                      "flex w-full items-center gap-3 py-2.5 text-left",
+                      z.onClick && "cursor-pointer"
+                    )}
                   >
-                    <span className="w-12 shrink-0 text-xs tabular-nums text-gray-400">
+                    <span className="w-12 shrink-0 text-xs tabular-nums text-faint">
                       {z.zeit || ""}
                     </span>
-                    <span className={`shrink-0 rounded px-2 py-0.5 text-[10px] font-medium ${typ.chip}`}>
+                    <span className={cx("shrink-0 rounded-md px-2 py-0.5 text-[10px] font-medium", typ.chip)}>
                       {typ.name}
                     </span>
-                    <span className="flex-1 truncate text-sm text-gray-800">{z.label}</span>
+                    <span className="flex-1 truncate text-sm text-ink/90">{z.label}</span>
                     {z.status && (
-                      <span className="shrink-0 text-xs font-medium text-gray-400">{z.status}</span>
+                      <span className="shrink-0 text-xs font-medium text-muted">{z.status}</span>
                     )}
-                    {z.onClick && <span className="text-gray-300">→</span>}
+                    {z.onClick && <span className="text-accent/60">→</span>}
                   </Zeile>
                 </li>
               )
@@ -188,22 +181,22 @@ function HeuteBlock({ profil, plan, onNavigate }) {
         )}
 
         {/* Tages-Check: eingehalten? */}
-        <div className="flex flex-wrap gap-5 border-t border-gray-100 py-2.5">
-          <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-700">
+        <div className="flex flex-wrap gap-5 border-t border-white/[0.06] py-3">
+          <label className="flex cursor-pointer items-center gap-2 text-sm text-muted">
             <input
               type="checkbox"
               checked={!!tages.ernaehrung}
               onChange={() => toggleFlag("ernaehrung")}
-              className="h-4 w-4 accent-gray-900"
+              className="h-4 w-4 accent-[var(--color-accent)]"
             />
             Ernährung eingehalten
           </label>
-          <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-700">
+          <label className="flex cursor-pointer items-center gap-2 text-sm text-muted">
             <input
               type="checkbox"
               checked={!!tages.fasten}
               onChange={() => toggleFlag("fasten")}
-              className="h-4 w-4 accent-gray-900"
+              className="h-4 w-4 accent-[var(--color-accent)]"
             />
             Fasten eingehalten
           </label>
@@ -218,57 +211,58 @@ function ZielBanner({ plan, onOeffnen }) {
     return (
       <button
         onClick={onOeffnen}
-        className="mt-10 flex w-full items-center justify-between rounded-xl border border-dashed border-gray-300 px-5 py-4 text-left transition-colors hover:border-gray-400"
+        className="mt-10 flex w-full items-center justify-between rounded-2xl border border-dashed border-white/15 px-5 py-4 text-left transition-colors hover:border-accent/50"
       >
         <span>
-          <span className="block text-sm font-medium text-gray-900">Ziel festlegen</span>
-          <span className="mt-0.5 block text-xs text-gray-400">
+          <span className="block text-sm font-semibold text-ink">Ziel festlegen</span>
+          <span className="mt-0.5 block text-xs text-muted">
             Definiere dein Ziel – Ernährung und Training richten sich danach.
           </span>
         </span>
-        <span className="text-gray-300">→</span>
+        <span className="text-accent/60">→</span>
       </button>
     )
   }
 
   const dl = plan.deadline
   return (
-    <button
+    <Card
+      as="button"
       onClick={onOeffnen}
-      className="mt-10 w-full rounded-xl border border-gray-200 bg-white p-5 text-left transition-colors hover:border-gray-400"
+      className="mt-10 w-full p-5 text-left transition-colors hover:border-accent/40"
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <span className="text-xs font-semibold uppercase tracking-widest text-gray-400">
+          <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-faint">
             Ziel &amp; Anpassung
           </span>
-          <p className="mt-1 text-lg font-semibold text-gray-900">{plan.modusInfo.name}</p>
+          <p className="mt-1 text-lg font-semibold text-ink">{plan.modusInfo.name}</p>
         </div>
         <div className="flex flex-wrap gap-2 text-center text-sm">
-          <span className="rounded-lg bg-gray-100 px-3 py-1.5 font-medium text-gray-700">
+          <span className="rounded-lg bg-surface-2 px-3 py-1.5 font-medium text-ink">
             {plan.kalorien} kcal
           </span>
-          <span className="rounded-lg bg-rose-50 px-3 py-1.5 font-medium text-rose-700">
+          <span className="rounded-lg bg-rose-500/15 px-3 py-1.5 font-medium text-rose-300">
             {plan.makros.protein} g P
           </span>
-          <span className="rounded-lg bg-amber-50 px-3 py-1.5 font-medium text-amber-700">
+          <span className="rounded-lg bg-amber-500/15 px-3 py-1.5 font-medium text-amber-300">
             {plan.makros.fett} g F
           </span>
-          <span className="rounded-lg bg-sky-50 px-3 py-1.5 font-medium text-sky-700">
+          <span className="rounded-lg bg-sky-500/15 px-3 py-1.5 font-medium text-sky-300">
             {plan.makros.kohlenhydrate} g C
           </span>
         </div>
       </div>
       {dl && (
-        <p className="mt-3 text-xs text-gray-400">
+        <p className="mt-3 text-xs text-muted">
           Deadline {new Date(dl.datum).toLocaleDateString("de-DE")} ({tageBis(dl.datum)}) ·{" "}
           {dl.differenz > 0 ? "+" : ""}{dl.differenz} kg ·{" "}
-          <span className={dl.realistisch ? "text-emerald-600" : "text-rose-600"}>
+          <span className={dl.realistisch ? "text-emerald-400" : "text-rose-400"}>
             {dl.realistisch ? "realistisch" : "ambitioniert"}
           </span>
         </p>
       )}
-    </button>
+    </Card>
   )
 }
 
@@ -278,33 +272,30 @@ function TrainingVorschau({ onOeffnen }) {
   const split = SPLITS[profil.splitWahl ?? "oberUnter"]
 
   return (
-    <button
-      onClick={onOeffnen}
-      className="rounded-xl border border-gray-200 bg-white p-5 text-left transition-colors hover:border-gray-400"
-    >
+    <Card as="button" onClick={onOeffnen} className="p-5 text-left transition-colors hover:border-accent/40">
       <div className="flex items-center justify-between">
-        <span className="text-xs font-semibold uppercase tracking-widest text-gray-400">Trainingsplan</span>
-        <span className="text-gray-300">→</span>
+        <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-faint">Trainingsplan</span>
+        <span className="text-accent/60">→</span>
       </div>
       <div className="mt-2 flex items-center gap-3">
         <div className="w-28 shrink-0">
           <Koerperkarte aktiv={muskeln} labels={false} />
         </div>
         <div>
-          <p className="text-lg font-semibold text-gray-900">{split?.name ?? "—"}</p>
-          <p className="mt-0.5 text-sm text-gray-400">
+          <p className="text-lg font-semibold text-ink">{split?.name ?? "—"}</p>
+          <p className="mt-0.5 text-sm text-muted">
             {anzahl} Trainingstage · {muskeln.size > 0 ? `${muskeln.size} Muskelgruppen` : "noch nichts geplant"}
           </p>
           <div className="mt-2 flex flex-wrap gap-1">
             {[...muskeln].slice(0, 4).map((m) => (
-              <span key={m} className="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-medium text-blue-700">
+              <span key={m} className="rounded-full bg-accent/15 px-2 py-0.5 text-[10px] font-medium text-accent-soft">
                 {MUSKELGRUPPEN[m]?.name}
               </span>
             ))}
           </div>
         </div>
       </div>
-    </button>
+    </Card>
   )
 }
 
@@ -315,22 +306,19 @@ function ErnaehrungVorschau({ plan, onOeffnen }) {
   const methode = methodeVon(fasten.methode)
 
   return (
-    <button
-      onClick={onOeffnen}
-      className="rounded-xl border border-gray-200 bg-white p-5 text-left transition-colors hover:border-gray-400"
-    >
+    <Card as="button" onClick={onOeffnen} className="p-5 text-left transition-colors hover:border-accent/40">
       <div className="flex items-center justify-between">
-        <span className="text-xs font-semibold uppercase tracking-widest text-gray-400">Ernährungsplan</span>
-        <span className="text-gray-300">→</span>
+        <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-faint">Ernährungsplan</span>
+        <span className="text-accent/60">→</span>
       </div>
-      <p className="mt-2 flex items-center gap-2 text-lg font-semibold text-gray-900">
-        <span className={`h-2.5 w-2.5 rounded-full ${FARBEN[konzept.farbe].punkt}`} />
+      <p className="mt-2 flex items-center gap-2 text-lg font-semibold text-ink">
+        <span className={cx("h-2.5 w-2.5 rounded-full", FARBEN[konzept.farbe].punkt)} />
         {konzept.name}
       </p>
-      <p className="mt-0.5 text-sm text-gray-400">
+      <p className="mt-0.5 text-sm text-muted">
         Fasten: {methode.name}
         {plan ? ` · ${plan.kalorien} kcal Ziel` : ""}
       </p>
-    </button>
+    </Card>
   )
 }

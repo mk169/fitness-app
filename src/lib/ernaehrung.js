@@ -104,11 +104,11 @@ export function aktivePhase(phasen, datumKey) {
 }
 
 export const FARBEN = {
-  gray: { chip: "bg-gray-100 text-gray-600", rand: "border-gray-300", punkt: "bg-gray-400" },
-  amber: { chip: "bg-amber-50 text-amber-700", rand: "border-amber-400", punkt: "bg-amber-500" },
-  sky: { chip: "bg-sky-50 text-sky-700", rand: "border-sky-400", punkt: "bg-sky-500" },
-  rose: { chip: "bg-rose-50 text-rose-700", rand: "border-rose-400", punkt: "bg-rose-500" },
-  emerald: { chip: "bg-emerald-50 text-emerald-700", rand: "border-emerald-400", punkt: "bg-emerald-500" },
+  gray: { chip: "bg-white/10 text-muted", rand: "border-white/20", punkt: "bg-slate-400" },
+  amber: { chip: "bg-amber-500/15 text-amber-300", rand: "border-amber-400/50", punkt: "bg-amber-400" },
+  sky: { chip: "bg-sky-500/15 text-sky-300", rand: "border-sky-400/50", punkt: "bg-sky-400" },
+  rose: { chip: "bg-rose-500/15 text-rose-300", rand: "border-rose-400/50", punkt: "bg-rose-400" },
+  emerald: { chip: "bg-emerald-500/15 text-emerald-300", rand: "border-emerald-400/50", punkt: "bg-emerald-400" },
 }
 
 // Aus einer Liste von Essensfenstern die aktuelle Fasten-Situation

@@ -37,18 +37,18 @@ const HINTEN = [
 // Körper-Silhouette: Rumpf als Pfad, Gliedmaßen als runde Striche –
 // dadurch wirken Arme und Beine wie weiche Kapseln.
 function Silhouette() {
-  const koerper = { fill: "url(#kkKoerper)", stroke: "#d3dae3", strokeWidth: 1.4 }
+  const koerper = { fill: "url(#kkKoerper)", stroke: "#3a4152", strokeWidth: 1.4 }
   const glied = {
     stroke: "url(#kkKoerper)",
     strokeLinecap: "round",
     fill: "none",
   }
-  const kontur = { stroke: "#d3dae3", strokeWidth: 1.2, strokeLinecap: "round", fill: "none", opacity: 0.9 }
+  const kontur = { stroke: "#3a4152", strokeWidth: 1.2, strokeLinecap: "round", fill: "none", opacity: 0.9 }
 
   return (
     <g>
       {/* Bodenschatten für Tiefe */}
-      <ellipse cx={0} cy={372} rx={52} ry={7} fill="#0f172a" opacity={0.07} />
+      <ellipse cx={0} cy={372} rx={52} ry={7} fill="#000000" opacity={0.35} />
 
       {/* Beine */}
       {[-1, 1].map((s) => (
@@ -86,8 +86,8 @@ function Silhouette() {
 
 function Muskel({ form, aktiv, farbe, onMuskel }) {
   const stil = {
-    fill: aktiv ? farbe : "#ffffff",
-    stroke: aktiv ? farbe : "#c6cfda",
+    fill: aktiv ? farbe : "#232733",
+    stroke: aktiv ? farbe : "#3a4152",
     strokeWidth: 1.3,
     cursor: onMuskel ? "pointer" : "default",
     filter: aktiv ? "url(#kkTiefe)" : undefined,
@@ -117,7 +117,7 @@ function Muskel({ form, aktiv, farbe, onMuskel }) {
         <rect x={r.x} y={r.y} width={r.w} height={r.h} rx={r.rx} {...stil} />
         <rect x={r.x + 2} y={r.y + 2} width={r.w - 4} height={r.h * 0.4} rx={r.rx} {...glanz} />
         {form.sixpack && (
-          <g stroke={aktiv ? "#ffffff" : "#e2e8f0"} strokeWidth={1.1} opacity={0.75} pointerEvents="none">
+          <g stroke={aktiv ? "#ffffff" : "#3a4152"} strokeWidth={1.1} opacity={0.75} pointerEvents="none">
             <line x1={0} y1={r.y + 4} x2={0} y2={r.y + r.h - 4} />
             <line x1={r.x + 4} y1={r.y + r.h / 3} x2={r.x + r.w - 4} y2={r.y + r.h / 3} />
             <line x1={r.x + 4} y1={r.y + (r.h * 2) / 3} x2={r.x + r.w - 4} y2={r.y + (r.h * 2) / 3} />
@@ -155,7 +155,7 @@ function Figur({ achse, formen, aktivSet, farbe, onMuskel }) {
   )
 }
 
-export default function Koerperkarte({ aktiv, onMuskel, farbe = "#3b82f6", labels = true }) {
+export default function Koerperkarte({ aktiv, onMuskel, farbe = "#6366f1", labels = true }) {
   const aktivSet = aktiv instanceof Set ? aktiv : new Set(aktiv ?? [])
 
   return (
@@ -163,8 +163,8 @@ export default function Koerperkarte({ aktiv, onMuskel, farbe = "#3b82f6", label
       <defs>
         {/* Körper: sanfter Verlauf von hell nach etwas dunkler = Volumen */}
         <linearGradient id="kkKoerper" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#fbfcfe" />
-          <stop offset="100%" stopColor="#e8edf3" />
+          <stop offset="0%" stopColor="#272c38" />
+          <stop offset="100%" stopColor="#171a22" />
         </linearGradient>
         {/* Glanzlicht von oben auf jedem Muskel */}
         <linearGradient id="kkGlanz" x1="0" y1="0" x2="0" y2="1">
@@ -181,7 +181,7 @@ export default function Koerperkarte({ aktiv, onMuskel, farbe = "#3b82f6", label
       <Figur achse={ACHSE_H} formen={HINTEN} aktivSet={aktivSet} farbe={farbe} onMuskel={onMuskel} />
 
       {labels && (
-        <g className="fill-gray-400" style={{ fontSize: 11 }} textAnchor="middle">
+        <g fill="#9aa1ad" style={{ fontSize: 11 }} textAnchor="middle">
           <text x={ACHSE_V} y={412}>Vorderseite</text>
           <text x={ACHSE_H} y={412}>Rückseite</text>
         </g>

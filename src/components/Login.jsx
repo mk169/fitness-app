@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { supabase } from "../lib/supabase"
+import { Card, Button, inputCls } from "./ui"
 
 // Einfacher Login mit E-Mail und Passwort. „Registrieren“ legt einen
 // neuen Account an, „Anmelden“ meldet einen bestehenden an.
@@ -31,20 +32,23 @@ export default function Login() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-6">
-      <div className="w-full max-w-sm">
-        <h1 className="text-center text-xl font-semibold tracking-tight">Form</h1>
-        <p className="mt-1 text-center text-sm text-gray-400">
-          {modus === "anmelden"
-            ? "Melde dich an, um deine Daten auf allen Geräten zu sehen."
-            : "Erstelle deinen Account."}
-        </p>
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-bg px-6">
+      <div className="pointer-events-none absolute -top-40 left-1/2 h-96 w-96 -translate-x-1/2 rounded-full bg-accent/20 blur-[120px]" />
+      <div className="relative w-full max-w-sm">
+        <div className="flex flex-col items-center">
+          <span className="grid h-12 w-12 place-items-center rounded-2xl bg-accent-gradient text-xl font-black text-white shadow-[var(--shadow-glow)]">
+            F
+          </span>
+          <h1 className="mt-3 text-2xl font-bold tracking-tight text-ink">Form</h1>
+          <p className="mt-1 text-center text-sm text-muted">
+            {modus === "anmelden"
+              ? "Melde dich an, um deine Daten auf allen Geräten zu sehen."
+              : "Erstelle deinen Account."}
+          </p>
+        </div>
 
-        <form
-          onSubmit={absenden}
-          className="mt-6 space-y-3 rounded-xl border border-gray-200 bg-white p-5"
-        >
-          <label className="flex flex-col text-xs text-gray-500">
+        <Card as="form" onSubmit={absenden} className="mt-6 space-y-3 p-5">
+          <label className="flex flex-col gap-1 text-xs font-medium text-muted">
             E-Mail
             <input
               type="email"
@@ -52,10 +56,10 @@ export default function Login() {
               onChange={(e) => setEmail(e.target.value)}
               required
               autoComplete="email"
-              className="mt-1 rounded-md border border-gray-200 px-3 py-2 text-sm text-gray-900 outline-none focus:border-gray-900"
+              className={inputCls}
             />
           </label>
-          <label className="flex flex-col text-xs text-gray-500">
+          <label className="flex flex-col gap-1 text-xs font-medium text-muted">
             Passwort
             <input
               type="password"
@@ -66,30 +70,26 @@ export default function Login() {
               autoComplete={
                 modus === "anmelden" ? "current-password" : "new-password"
               }
-              className="mt-1 rounded-md border border-gray-200 px-3 py-2 text-sm text-gray-900 outline-none focus:border-gray-900"
+              className={inputCls}
             />
           </label>
 
-          {meldung && <p className="text-xs text-gray-600">{meldung}</p>}
+          {meldung && <p className="text-xs text-muted">{meldung}</p>}
 
-          <button
-            type="submit"
-            disabled={laden}
-            className="w-full rounded-md bg-gray-900 py-2 text-sm font-medium text-white hover:bg-gray-700 disabled:opacity-50"
-          >
+          <Button type="submit" disabled={laden} className="w-full py-2.5">
             {laden
               ? "Moment…"
               : modus === "anmelden"
                 ? "Anmelden"
                 : "Registrieren"}
-          </button>
-        </form>
+          </Button>
+        </Card>
 
         <button
           onClick={() =>
             setModus(modus === "anmelden" ? "registrieren" : "anmelden")
           }
-          className="mt-3 w-full text-center text-xs text-gray-400 hover:text-gray-900"
+          className="mt-3 w-full text-center text-xs text-muted transition-colors hover:text-ink"
         >
           {modus === "anmelden"
             ? "Noch kein Account? Registrieren"
