@@ -53,6 +53,84 @@ export const KONZEPTE = [
       "Protein auf alle Mahlzeiten verteilen",
     ],
   },
+  {
+    id: "mediterran",
+    name: "Mediterran",
+    kurz: "herzgesund",
+    farbe: "sky",
+    idee: "Traditionelle Mittelmeerküche – die am besten untersuchte Ernährungsform für Herz-Kreislauf-Gesundheit und Langlebigkeit.",
+    prinzipien: [
+      "Olivenöl als Hauptfettquelle, Nüsse & Samen",
+      "Viel Gemüse, Hülsenfrüchte, Obst, Vollkorn",
+      "Fisch & Meeresfrüchte mehrmals pro Woche",
+      "Rotes Fleisch selten, Zucker & Fertigkost meiden",
+    ],
+  },
+  {
+    id: "paleo",
+    name: "Paleo",
+    kurz: "unverarbeitet",
+    farbe: "orange",
+    idee: "„Steinzeit-Ernährung“ – nur unverarbeitete Lebensmittel, keine Getreide, Milchprodukte oder Industriezucker.",
+    prinzipien: [
+      "Fleisch, Fisch, Eier, Gemüse, Obst, Nüsse",
+      "Keine Getreideprodukte & Hülsenfrüchte",
+      "Keine Milchprodukte & raffinierten Zucker",
+      "Gute Fette aus Avocado, Kokos, Olivenöl",
+    ],
+  },
+  {
+    id: "vegan",
+    name: "Pflanzlich",
+    kurz: "vegan",
+    farbe: "lime",
+    idee: "Rein pflanzliche Kost – mit etwas Planung gut für Muskelaufbau und Gesundheit geeignet.",
+    prinzipien: [
+      "Proteinquellen: Hülsenfrüchte, Tofu, Tempeh, Seitan",
+      "Vielfalt für alle essenziellen Aminosäuren",
+      "Vitamin B12 supplementieren, auf Eisen & Omega-3 achten",
+      "Vollwertig statt hochverarbeiteter Ersatzprodukte",
+    ],
+  },
+  {
+    id: "carnivore",
+    name: "Carnivore",
+    kurz: "tierisch",
+    farbe: "red",
+    idee: "Ausschließlich tierische Lebensmittel – maximal kohlenhydratarm, sehr eliminierend. Eher ein Experiment als Dauerlösung.",
+    prinzipien: [
+      "Fleisch, Innereien, Fisch, Eier, etwas Butter",
+      "Nahezu keine Kohlenhydrate",
+      "Fettreiche Stücke für ausreichend Energie",
+      "Elektrolyte & regelmäßige Blutwerte im Blick behalten",
+    ],
+  },
+  {
+    id: "lowcarb",
+    name: "Low Carb",
+    kurz: "50–100 g Carbs",
+    farbe: "teal",
+    idee: "Moderat kohlenhydratreduziert – flexibler als Keto, gut für Fettabbau und stabile Blutzuckerwerte.",
+    prinzipien: [
+      "50–100 g Kohlenhydrate pro Tag",
+      "Carbs vor allem rund ums Training",
+      "Reichlich Protein & Gemüse, gute Fette",
+      "Zucker & Weißmehl weitgehend meiden",
+    ],
+  },
+  {
+    id: "carbcycling",
+    name: "Carb-Cycling",
+    kurz: "Carbs wechseln",
+    farbe: "violet",
+    idee: "Kohlenhydrate nach Trainingsbelastung steuern: viel an harten Tagen, wenig an Ruhetagen – Leistung trifft Fettabbau.",
+    prinzipien: [
+      "High-Carb an intensiven Trainingstagen",
+      "Low-Carb an Ruhe- & Cardio-Tagen",
+      "Protein täglich hoch halten",
+      "Fett steigt an Low-Carb-Tagen als Energiequelle",
+    ],
+  },
 ]
 
 // Fasten-Methoden. fenster = Standard-Essensfenster (Stunden 0–24). Bei
@@ -64,7 +142,10 @@ export const FASTEN_METHODEN = [
   { id: "16:8", name: "16:8", kurz: "klassisch", fenster: [{ start: 12, ende: 20 }], beschreibung: "16 h fasten, 8 h Essensfenster." },
   { id: "18:6", name: "18:6", kurz: "fortgeschritten", fenster: [{ start: 14, ende: 20 }], beschreibung: "18 h fasten, 6 h essen." },
   { id: "omad", name: "OMAD 20:4", kurz: "1 Mahlzeit", fenster: [{ start: 17, ende: 21 }], beschreibung: "Eine Mahlzeit pro Tag, ~20 h fasten." },
+  { id: "warrior", name: "Warrior 23:1", kurz: "sehr strikt", fenster: [{ start: 18, ende: 19 }], beschreibung: "23 h fasten mit einem einzigen, üppigen Abendessen." },
   { id: "5:2", name: "5:2", kurz: "2 Fastentage", fenster: [], beschreibung: "5 Tage normal, an 2 Tagen stark reduziert (~500–600 kcal)." },
+  { id: "adf", name: "Alternierend (ADF)", kurz: "jeden 2. Tag", fenster: [], beschreibung: "Im Wechsel ein normaler und ein Fastentag (~500 kcal)." },
+  { id: "eatstopeat", name: "Eat-Stop-Eat", kurz: "1–2× 24 h", fenster: [], beschreibung: "Ein- bis zweimal pro Woche ein volles 24-h-Fasten." },
   { id: "custom", name: "Eigene Fenster", kurz: "individuell", fenster: [{ start: 8, ende: 12 }, { start: 17, ende: 21 }], beschreibung: "Mehrere eigene Essensfenster frei definieren." },
 ]
 
@@ -109,6 +190,11 @@ export const FARBEN = {
   sky: { chip: "bg-sky-500/15 text-sky-300", rand: "border-sky-400/50", punkt: "bg-sky-400" },
   rose: { chip: "bg-rose-500/15 text-rose-300", rand: "border-rose-400/50", punkt: "bg-rose-400" },
   emerald: { chip: "bg-emerald-500/15 text-emerald-300", rand: "border-emerald-400/50", punkt: "bg-emerald-400" },
+  orange: { chip: "bg-orange-500/15 text-orange-300", rand: "border-orange-400/50", punkt: "bg-orange-400" },
+  lime: { chip: "bg-lime-500/15 text-lime-300", rand: "border-lime-400/50", punkt: "bg-lime-400" },
+  red: { chip: "bg-red-500/15 text-red-300", rand: "border-red-400/50", punkt: "bg-red-400" },
+  teal: { chip: "bg-teal-500/15 text-teal-300", rand: "border-teal-400/50", punkt: "bg-teal-400" },
+  violet: { chip: "bg-violet-500/15 text-violet-300", rand: "border-violet-400/50", punkt: "bg-violet-400" },
 }
 
 // Aus einer Liste von Essensfenstern die aktuelle Fasten-Situation
