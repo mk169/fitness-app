@@ -5,7 +5,6 @@ on:
     branches:
       - main
       - claude/fitness-app-design-overhaul-tho8yk
-      - claude/nutrition-training-plans-db-nrlol2
   workflow_dispatch:
 
 # Rechte, die der Standard-Token für das Pages-Deployment braucht.
