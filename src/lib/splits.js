@@ -59,6 +59,68 @@ export const SPLITS = {
       { name: "Beine", bloecke: [["Beine", 4], ["Core", 1]] },
     ],
   },
+  gk4: {
+    name: "Ganzkörper 4×",
+    empfohleneTage: 4,
+    kurz: "hohe Frequenz",
+    wissenschaft:
+      "Vier Ganzkörper-Einheiten treffen jeden Muskel bis zu 4× pro Woche " +
+      "bei moderatem Volumen pro Einheit. Die hohe Frequenz hält die " +
+      "Proteinsynthese durchgehend aktiv und verteilt die Belastung – gut " +
+      "für Fortgeschrittene, die die Woche flexibel halten wollen.",
+    zyklus: [
+      { name: "Ganzkörper A", bloecke: [["Beine", 2], ["Push", 2], ["Pull", 2]] },
+      { name: "Ganzkörper B", bloecke: [["Pull", 2], ["Push", 2], ["Beine", 1], ["Core", 1]] },
+    ],
+  },
+  phul: {
+    name: "Power / Hypertrophie U/L",
+    empfohleneTage: 4,
+    kurz: "Kraft + Muskel",
+    wissenschaft:
+      "PHUL kombiniert zwei schwere Kraft-Tage (niedrige Wdh., Grundübungen) " +
+      "mit zwei Hypertrophie-Tagen (höhere Wdh., mehr Isolation). So werden " +
+      "Maximalkraft und Muskelwachstum parallel entwickelt – jeder Muskel " +
+      "wird 2× pro Woche getroffen.",
+    zyklus: [
+      { name: "Oberkörper Kraft", bloecke: [["Push", 3], ["Pull", 3]] },
+      { name: "Unterkörper Kraft", bloecke: [["Beine", 4], ["Core", 1]] },
+      { name: "Oberkörper Hypertrophie", bloecke: [["Push", 3], ["Pull", 3]] },
+      { name: "Unterkörper Hypertrophie", bloecke: [["Beine", 4], ["Core", 2]] },
+    ],
+  },
+  bro: {
+    name: "5er-Split",
+    empfohleneTage: 5,
+    kurz: "je Muskel 1 Tag",
+    wissenschaft:
+      "Der klassische „Bro-Split“ widmet jeder Muskelgruppe einen eigenen " +
+      "Tag mit sehr hohem Volumen. Die Frequenz von 1× pro Woche ist " +
+      "suboptimal, das enorme Volumen pro Einheit gleicht das für erfahrene " +
+      "Bodybuilder aber teilweise aus – beliebt und motivierend.",
+    zyklus: [
+      { name: "Brust & Trizeps", bloecke: [["Push", 5]] },
+      { name: "Rücken & Bizeps", bloecke: [["Pull", 5]] },
+      { name: "Beine", bloecke: [["Beine", 5], ["Core", 1]] },
+      { name: "Schultern", bloecke: [["Push", 4], ["Core", 1]] },
+      { name: "Arme & Core", bloecke: [["Pull", 3], ["Core", 2]] },
+    ],
+  },
+  arnold: {
+    name: "Arnold-Split",
+    empfohleneTage: 6,
+    kurz: "Antagonisten, 6 Tage",
+    wissenschaft:
+      "Der von Arnold Schwarzenegger populär gemachte Split kombiniert " +
+      "gegenspielende Muskelgruppen (Brust/Rücken) und trifft jeden Muskel " +
+      "2× pro Woche bei sehr hohem Volumen. Nur bei guter Regeneration und " +
+      "Trainingserfahrung sinnvoll.",
+    zyklus: [
+      { name: "Brust & Rücken", bloecke: [["Push", 3], ["Pull", 3]] },
+      { name: "Schultern & Arme", bloecke: [["Push", 3], ["Pull", 3]] },
+      { name: "Beine", bloecke: [["Beine", 5], ["Core", 1]] },
+    ],
+  },
 }
 
 // Gleichmäßige Standard-Verteilung von n Trainingstagen über die Woche.
