@@ -9,19 +9,20 @@ import TrainingsplanSeite from "./components/TrainingsplanSeite"
 import ErnaehrungsplanSeite from "./components/ErnaehrungsplanSeite"
 import KalenderSeite from "./components/KalenderSeite"
 
-// Zentrale Navigation – Single Source of Truth für Sidebar & Bottom-Tabbar.
+// Primär-Navigation – bewusst schlank (4 Tabs). „Anpassung“ liegt nicht in
+// der Leiste, sondern hinter je einer Taste auf Training/Ernährung und dem
+// Zahnrad oben rechts. Das hält Sidebar & Bottom-Tabbar ruhig und klar.
 const NAV = [
   { key: "dashboard", label: "Dashboard", icon: icons.dashboard },
   { key: "training", label: "Training", icon: icons.training },
   { key: "ernaehrung", label: "Ernährung", icon: icons.ernaehrung },
   { key: "kalender", label: "Kalender", icon: icons.kalender },
-  { key: "ziel", label: "Ziel", icon: icons.ziel },
 ]
 
 function Wortmarke() {
   return (
     <div className="flex items-center gap-2.5">
-      <span className="grid h-9 w-9 place-items-center rounded-xl bg-accent-gradient text-base font-black text-white shadow-[var(--shadow-glow)]">
+      <span className="grid h-9 w-9 place-items-center rounded-xl bg-accent-gradient text-base font-black on-accent shadow-[var(--shadow-glow)]">
         M
       </span>
       <span className="text-lg font-bold tracking-tight text-ink">Mogged</span>
@@ -58,6 +59,20 @@ function Sidebar({ seite, onNavigate, session }) {
             </button>
           )
         })}
+
+        {/* Anpassung/Ziel bewusst dezent am Fuß der Navigation. */}
+        <button
+          onClick={() => onNavigate("anpassung")}
+          className={cx(
+            "group mt-1 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
+            seite === "anpassung"
+              ? "bg-accent/15 text-accent-soft"
+              : "text-faint hover:bg-white/[0.04] hover:text-ink"
+          )}
+        >
+          {icons.zahnrad("h-5 w-5 shrink-0")}
+          Ziel &amp; Anpassung
+        </button>
       </nav>
 
       {cloudAktiv && session && (
@@ -101,8 +116,29 @@ function BottomBar({ seite, onNavigate }) {
   )
 }
 
+// Mobiler Kopf: Wortmarke + Zahnrad (Ziel & Anpassung). Nur auf kleinen
+// Bildschirmen sichtbar – am Desktop übernimmt das die Sidebar.
+function TopBar({ onNavigate }) {
+  return (
+    <header className="sticky top-0 z-20 flex items-center justify-between border-b border-white/[0.06] bg-bg/90 px-4 py-3 backdrop-blur-md md:hidden">
+      <button onClick={() => onNavigate("dashboard")}>
+        <Wortmarke />
+      </button>
+      <button
+        onClick={() => onNavigate("anpassung")}
+        aria-label="Ziel & Anpassung"
+        className="grid h-9 w-9 place-items-center rounded-xl border border-white/10 bg-surface-2 text-muted transition-colors hover:text-ink"
+      >
+        {icons.zahnrad("h-5 w-5")}
+      </button>
+    </header>
+  )
+}
+
 export default function App() {
   const [seite, setSeite] = useState("dashboard")
+  // Optionaler Fokus, z. B. welcher Block auf der Anpassung-Seite geöffnet wird.
+  const [fokus, setFokus] = useState(null)
   // Ohne Cloud gibt es keinen Login – dann gilt die App sofort als bereit.
   const [session, setSession] = useState(null)
   const [authBereit, setAuthBereit] = useState(!cloudAktiv)
@@ -122,8 +158,13 @@ export default function App() {
     return () => sub.subscription.unsubscribe()
   }, [])
 
-  const navigiere = (ziel) => setSeite(ziel)
-  const zurueck = () => setSeite("dashboard")
+  // Navigation mit optionalem Fokus-Objekt: navigiere("anpassung", { fokus: "training" }).
+  const navigiere = (ziel, opts = {}) => {
+    setFokus(opts.fokus ?? null)
+    setSeite(ziel)
+    window.scrollTo({ top: 0 })
+  }
+  const zurueck = () => navigiere("dashboard")
 
   if (cloudAktiv && !authBereit) {
     return (
@@ -140,16 +181,15 @@ export default function App() {
       <BottomBar seite={seite} onNavigate={navigiere} />
 
       <main className="md:pl-60">
+        <TopBar onNavigate={navigiere} />
         <div
           key={seite}
-          className="animate-page mx-auto max-w-5xl px-4 pb-28 pt-6 sm:px-6 sm:pt-10 md:pb-14"
+          className="animate-page mx-auto max-w-5xl px-4 pb-28 pt-6 sm:px-6 sm:pt-8 md:pb-14"
         >
           {seite === "dashboard" && <Dashboard onNavigate={navigiere} />}
-          {seite === "ziel" && <ZielSeite onBack={zurueck} />}
-          {seite === "training" && (
-            <TrainingsplanSeite onBack={zurueck} onZiel={() => navigiere("ziel")} />
-          )}
-          {seite === "ernaehrung" && <ErnaehrungsplanSeite onBack={zurueck} />}
+          {seite === "anpassung" && <ZielSeite fokus={fokus} onBack={zurueck} />}
+          {seite === "training" && <TrainingsplanSeite onNavigate={navigiere} />}
+          {seite === "ernaehrung" && <ErnaehrungsplanSeite onNavigate={navigiere} />}
           {seite === "kalender" && <KalenderSeite onBack={zurueck} />}
         </div>
       </main>

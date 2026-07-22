@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import useStored from "../lib/useStored"
 import { heute } from "../lib/datum"
 import { ZIEL_MODI, AKTIVITAET, berechnePlan } from "../lib/algorithmus"
@@ -49,7 +49,7 @@ const TAG_LABELS = [
   { key: "so", label: "So" },
 ]
 
-export default function ZielSeite() {
+export default function ZielSeite({ fokus, onBack }) {
   const { profil, setProfil, plan } = useZiel()
   const set = (feld) => (e) => {
     const v = e.target.value
@@ -57,8 +57,23 @@ export default function ZielSeite() {
     setProfil({ ...profil, [feld]: zahl.includes(feld) ? Number(v) : v })
   }
 
+  // Kommt der Nutzer über eine „Anpassen“-Taste, zum passenden Block scrollen.
+  useEffect(() => {
+    if (!fokus) return
+    const el = document.getElementById(`anpassung-${fokus}`)
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" })
+  }, [fokus])
+
   return (
     <div>
+      {onBack && (
+        <button
+          onClick={onBack}
+          className="mb-3 text-xs font-medium text-muted transition-colors hover:text-ink"
+        >
+          ← Zurück
+        </button>
+      )}
       <PageHeader
         title="Ziel & Anpassung"
         subtitle="Ziel, Trainingsplan und Ernährung – alles hier einstellbar, jederzeit änderbar."
@@ -129,9 +144,13 @@ export default function ZielSeite() {
         <Ergebnis plan={plan} />
       </div>
 
-      <TrainingAnpassen profil={profil} setProfil={setProfil} />
-      <ErnaehrungAnpassen />
-      <FastenPhasen />
+      <div id="anpassung-training" className="scroll-mt-4">
+        <TrainingAnpassen profil={profil} setProfil={setProfil} />
+      </div>
+      <div id="anpassung-ernaehrung" className="scroll-mt-4">
+        <ErnaehrungAnpassen />
+        <FastenPhasen />
+      </div>
     </div>
   )
 }
@@ -316,7 +335,7 @@ function FeinschliffEditor({ tageWahl }) {
               className={cx(
                 "rounded-lg border px-2.5 py-1.5 text-sm transition-colors",
                 tag === t.key
-                  ? "border-transparent bg-accent-gradient text-white"
+                  ? "border-transparent bg-accent-gradient on-accent"
                   : "border-white/10 text-muted hover:border-white/25"
               )}
             >

@@ -1,32 +1,54 @@
 import { useEffect, useState } from "react"
 import useStored from "../lib/useStored"
 import {
-  KONZEPTE, FASTEN_METHODEN, konzeptVon, methodeVon, FARBEN, fastenStatus,
+  FASTEN_METHODEN, konzeptVon, methodeVon, FARBEN, fastenStatus,
   FASTEN_STANDARD, phasenStatus,
 } from "../lib/ernaehrung"
 import { heute } from "../lib/datum"
 import { useZiel } from "./ZielSeite"
-import { Card, PageHeader, SectionTitle, Button, Pill, cx, labelCls } from "./ui"
+import { Card, PageHeader, SectionTitle, Button, Pill, cx, labelCls, icons } from "./ui"
 
 // Ernährungsplan: Makro-Ziele (aus dem Algorithmus), Ernährungskonzept und
 // Fasten mit einer oder mehreren frei einstellbaren Essenszeiten – plus
 // mehrtägige Fastenphasen (24–72 h und länger).
 
-export default function ErnaehrungsplanSeite() {
+export default function ErnaehrungsplanSeite({ onNavigate }) {
   const { plan } = useZiel()
 
   return (
     <div>
       <PageHeader
-        title="Ernährungsplan"
-        subtitle="Makro-Ziele aus deinem Ziel, dazu Konzept und Fasten frei kombinierbar."
+        title="Ernährung"
+        subtitle="Dein Ernährungsplan auf einen Blick – Tagesziel, Konzept, Mahlzeiten und Fasten."
       />
 
+      {/* 1. Plan darstellen: Tagesziel + Konzept + Mahlzeiten */}
       <MakroZiele plan={plan} />
-      <KonzeptWahl />
+      <KonzeptAnzeige />
+      <MahlzeitenLog kalorienZiel={plan?.kalorien} />
+
+      {/* 2. Fasten: Status/Methode + mehrtägige Programme */}
       <FastenBereich />
       <FastenPhasen />
-      <MahlzeitenLog kalorienZiel={plan?.kalorien} />
+
+      {/* 3. Eine Taste zur Anpassung (Methoden & Ansätze ans Ziel geknüpft) */}
+      <button
+        onClick={() => onNavigate?.("anpassung", { fokus: "ernaehrung" })}
+        className="mt-8 flex w-full items-center justify-between rounded-2xl border border-white/10 bg-surface px-5 py-4 text-left transition-colors hover:border-accent/50"
+      >
+        <span className="flex items-center gap-3">
+          <span className="grid h-10 w-10 place-items-center rounded-xl bg-accent/15 text-accent">
+            {icons.zahnrad("h-5 w-5")}
+          </span>
+          <span>
+            <span className="block font-semibold text-ink">Ernährung anpassen</span>
+            <span className="mt-0.5 block text-xs text-muted">
+              Konzepte &amp; Fastenmethoden – wissenschaftlich ans Ziel geknüpft
+            </span>
+          </span>
+        </span>
+        <span className="text-accent">→</span>
+      </button>
     </div>
   )
 }
@@ -66,24 +88,19 @@ function MakroZiele({ plan }) {
   )
 }
 
-function KonzeptWahl() {
-  const [gewaehlt, setGewaehlt] = useStored("ernaehrungKonzept", "standard")
+// Ernährungskonzept als reine Darstellung – die Auswahl passiert über die
+// „Ernährung anpassen“-Taste (ans Ziel geknüpft).
+function KonzeptAnzeige() {
+  const [gewaehlt] = useStored("ernaehrungKonzept", "standard")
   const konzept = konzeptVon(gewaehlt)
   const farbe = FARBEN[konzept.farbe]
 
   return (
     <section className="mt-8">
       <SectionTitle>Ernährungskonzept</SectionTitle>
-      <div className="mt-3 flex flex-wrap gap-2">
-        {KONZEPTE.map((k) => (
-          <Pill key={k.id} active={k.id === gewaehlt} onClick={() => setGewaehlt(k.id)} className="px-4 py-2">
-            <span className={cx("mr-2 inline-block h-2 w-2 rounded-full", FARBEN[k.farbe].punkt)} />
-            {k.name}
-          </Pill>
-        ))}
-      </div>
       <Card className="mt-3 p-5">
         <div className="flex items-center gap-2">
+          <span className={cx("h-2.5 w-2.5 rounded-full", farbe.punkt)} />
           <h3 className="text-lg font-semibold text-ink">{konzept.name}</h3>
           <span className={cx("rounded-full px-2 py-0.5 text-[10px] font-medium", farbe.chip)}>{konzept.kurz}</span>
         </div>

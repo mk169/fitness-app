@@ -3,33 +3,38 @@
 
 /* ---------------------------------------------------------------------------
    Design-Tokens (Tailwind v4 @theme)
-   Dunkles, edles Theme mit Indigo→Violett-Akzent. Diese Tokens erzeugen
-   Utilities wie bg-surface, text-ink, border-hair, text-accent, bg-accent …
+   Dunkles, sportliches Theme im „Stronger“-Look: kräftiger Gold-Akzent,
+   Grün für „erledigt“. Diese Tokens erzeugen Utilities wie bg-surface,
+   text-ink, border-hair, text-accent, bg-accent, text-success …
 --------------------------------------------------------------------------- */
 @theme {
-  /* Flächen */
-  --color-bg: #0a0b10;
-  --color-bg-soft: #0e0f16;
-  --color-surface: #14161f;
-  --color-surface-2: #1b1e29;
-  --color-hair: #272b38;
+  /* Flächen – tiefes, neutrales Schwarzblau für Ruhe & Kontrast */
+  --color-bg: #08090d;
+  --color-bg-soft: #0d0f15;
+  --color-surface: #14161d;
+  --color-surface-2: #1c1f28;
+  --color-hair: #2a2e3a;
 
   /* Text */
-  --color-ink: #f3f4f8;
+  --color-ink: #f4f5f8;
   --color-muted: #9aa1ad;
   --color-faint: #6b7280;
 
-  /* Akzent (Indigo → Violett) */
-  --color-accent: #6366f1;
-  --color-accent-2: #8b5cf6;
-  --color-accent-soft: #a5b4fc;
+  /* Akzent (Gold / Bernstein) */
+  --color-accent: #f5a524;
+  --color-accent-2: #f59e0b;
+  --color-accent-soft: #fcd34d;
+
+  /* Erfolg (Grün) – „erledigt“, abgehakte Sätze, offenes Essensfenster */
+  --color-success: #22c55e;
+  --color-success-soft: #4ade80;
 
   /* Schrift */
   --font-sans: "Inter", system-ui, "Segoe UI", Roboto, sans-serif;
 
-  /* Premium-Schatten + Akzent-Glow */
-  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px -12px rgba(0, 0, 0, 0.6);
-  --shadow-glow: 0 0 0 1px rgba(99, 102, 241, 0.25), 0 8px 30px -8px rgba(99, 102, 241, 0.45);
+  /* Schatten + Gold-Glow */
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.45), 0 8px 24px -12px rgba(0, 0, 0, 0.65);
+  --shadow-glow: 0 0 0 1px rgba(245, 165, 36, 0.22), 0 8px 30px -8px rgba(245, 165, 36, 0.4);
 }
 
 /* Basis ------------------------------------------------------------------- */
@@ -89,6 +94,11 @@ body {
 
 .bg-accent-gradient {
   background-image: linear-gradient(120deg, var(--color-accent), var(--color-accent-2));
+}
+
+/* Text auf Gold-Flächen: dunkel für Lesbarkeit (Gold ist hell). */
+.on-accent {
+  color: #1a1204;
 }
 
 /* Sanftes Erscheinen der Seiten */

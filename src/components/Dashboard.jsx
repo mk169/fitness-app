@@ -10,7 +10,8 @@ import { WOCHEN_KEYS, SPLITS, tagesName, standardTage, normEintrag } from "../li
 import {
   konzeptVon, methodeVon, FARBEN, FASTEN_STANDARD, fastenStatus, aktivePhase,
 } from "../lib/ernaehrung"
-import { Card, SectionLink, cx } from "./ui"
+import { Card, SectionLink, Button, cx } from "./ui"
+import { StreakBanner } from "./Streak"
 
 function begruessung() {
   const stunde = new Date().getHours()
@@ -37,6 +38,9 @@ export default function Dashboard({ onNavigate }) {
       <h1 className="mt-1 text-3xl font-bold tracking-tight text-ink">
         {begruessung()}, <span className="text-gradient">Matthias</span>
       </h1>
+
+      {/* Streak & Wochen-Kennzahlen */}
+      <StreakBanner />
 
       {/* 1. Heute – mit dem Kalender verbundener Tagesblock zum Abhaken */}
       <HeuteBlock profil={profil} plan={plan} onNavigate={onNavigate} />
@@ -140,7 +144,14 @@ function HeuteBlock({ profil, plan, onNavigate }) {
 
   return (
     <section className="mt-6">
-      <SectionLink onClick={() => onNavigate("kalender")}>Heute</SectionLink>
+      <div className="flex items-center justify-between gap-3">
+        <SectionLink onClick={() => onNavigate("kalender")}>Heute</SectionLink>
+        {eintraegePlan.length > 0 && (
+          <Button onClick={() => onNavigate("training")} className="gap-1.5 px-4 py-1.5">
+            ▶ {abgehakt >= eintraegePlan.length ? "Training ansehen" : "Training starten"}
+          </Button>
+        )}
+      </div>
 
       <div className="relative mt-3 overflow-hidden rounded-2xl border border-accent/30 bg-surface px-5 py-2 shadow-[var(--shadow-glow)]">
         <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-accent/20 blur-3xl" />

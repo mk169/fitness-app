@@ -63,7 +63,9 @@ export function PageHeader({ title, subtitle, right }) {
 // Button ------------------------------------------------------------------
 const buttonVarianten = {
   primary:
-    "bg-accent-gradient text-white shadow-[var(--shadow-glow)] hover:brightness-110",
+    "bg-accent-gradient on-accent shadow-[var(--shadow-glow)] hover:brightness-105",
+  success:
+    "bg-success text-white shadow-[0_8px_30px_-8px_rgba(34,197,94,0.5)] hover:brightness-110",
   subtle:
     "border border-white/10 bg-surface-2 text-ink hover:border-white/25",
   ghost: "text-muted hover:text-ink",
@@ -89,12 +91,41 @@ export function Pill({ active, className, ...rest }) {
       className={cx(
         "rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors",
         active
-          ? "border-transparent bg-accent-gradient text-white shadow-[var(--shadow-glow)]"
+          ? "border-transparent bg-accent-gradient on-accent shadow-[var(--shadow-glow)]"
           : "border-white/10 bg-surface-2 text-muted hover:border-white/25 hover:text-ink",
         className
       )}
       {...rest}
     />
+  )
+}
+
+// Grünes Häkchen-Kästchen (wie in den Stronger-Screenshots). Ersetzt die
+// nativen Checkboxen: leer = umrandet, erledigt = grün gefüllt mit Haken.
+export function Check({ checked, onChange, className, size = "h-8 w-8", title }) {
+  return (
+    <button
+      type="button"
+      role="checkbox"
+      aria-checked={checked}
+      title={title}
+      onClick={(e) => {
+        e.stopPropagation()
+        onChange?.(!checked)
+      }}
+      className={cx(
+        "grid shrink-0 place-items-center rounded-lg border transition-all",
+        size,
+        checked
+          ? "border-success bg-success text-white shadow-[0_4px_14px_-4px_rgba(34,197,94,0.6)]"
+          : "border-white/15 bg-surface-2 text-transparent hover:border-success/50",
+        className
+      )}
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+        <path d="M20 6L9 17l-5-5" />
+      </svg>
+    </button>
   )
 }
 
@@ -167,6 +198,26 @@ export const icons = {
     <Svg className={c}>
       <path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3" />
       <path d="M10 12H3m0 0l3.5-3.5M3 12l3.5 3.5" />
+    </Svg>
+  ),
+  flamme: (c) => (
+    <Svg className={c}>
+      <path d="M12 3c1.5 3 4.5 4.2 4.5 8.5A4.5 4.5 0 0 1 12 16a4.5 4.5 0 0 1-4.5-4.5C7.5 9 9 7.5 9 7.5c.5 1.5 1.5 2 1.5 2C10 7 12 5 12 3z" />
+      <path d="M12 21a5 5 0 0 0 5-5c0-1-.3-2-.8-2.8" />
+      <path d="M12 21a5 5 0 0 1-5-5" />
+    </Svg>
+  ),
+  stats: (c) => (
+    <Svg className={c}>
+      <path d="M4 19V5" />
+      <path d="M4 15l4-4 4 3 7-8" />
+      <path d="M18 6h3v3" />
+    </Svg>
+  ),
+  zahnrad: (c) => (
+    <Svg className={c}>
+      <circle cx="12" cy="12" r="3.2" />
+      <path d="M12 3v2.2M12 18.8V21M4.2 7.5l1.9 1.1M17.9 15.4l1.9 1.1M4.2 16.5l1.9-1.1M17.9 8.6l1.9-1.1" />
     </Svg>
   ),
 }

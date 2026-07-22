@@ -36,7 +36,7 @@ export default function Login() {
       <div className="pointer-events-none absolute -top-40 left-1/2 h-96 w-96 -translate-x-1/2 rounded-full bg-accent/20 blur-[120px]" />
       <div className="relative w-full max-w-sm">
         <div className="flex flex-col items-center">
-          <span className="grid h-12 w-12 place-items-center rounded-2xl bg-accent-gradient text-xl font-black text-white shadow-[var(--shadow-glow)]">
+          <span className="grid h-12 w-12 place-items-center rounded-2xl bg-accent-gradient text-xl font-black on-accent shadow-[var(--shadow-glow)]">
             M
           </span>
           <h1 className="mt-3 text-2xl font-bold tracking-tight text-ink">Mogged</h1>

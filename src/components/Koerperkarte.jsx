@@ -155,7 +155,7 @@ function Figur({ achse, formen, aktivSet, farbe, onMuskel }) {
   )
 }
 
-export default function Koerperkarte({ aktiv, onMuskel, farbe = "#6366f1", labels = true }) {
+export default function Koerperkarte({ aktiv, onMuskel, farbe = "#f5a524", labels = true }) {
   const aktivSet = aktiv instanceof Set ? aktiv : new Set(aktiv ?? [])
 
   return (

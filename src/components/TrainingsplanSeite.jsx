@@ -1,16 +1,22 @@
 import { useEffect, useState } from "react"
 import useStored from "../lib/useStored"
 import { heute } from "../lib/datum"
-import { MUSKELGRUPPEN, uebungVon, muskelnVon } from "../lib/uebungen"
+import { uebungVon, muskelnVon } from "../lib/uebungen"
 import { SPLITS, WOCHEN_KEYS, standardTage, tagesName, planTag, normEintrag } from "../lib/splits"
-import { e1rm, verlaufVon, overloadVorschlag } from "../lib/training"
+import { verlaufVon } from "../lib/training"
+import { montagVon } from "../lib/statistik"
 import { useZiel } from "./ZielSeite"
-import Koerperkarte from "./Koerperkarte"
-import { Card, PageHeader, SectionTitle, Button, cx, labelCls } from "./ui"
+import InlineLogger from "./InlineLogger"
+import { TrainingsHeatmap } from "./Streak"
+import { Card, PageHeader, SectionTitle, Button, cx, labelCls, icons } from "./ui"
 
-// Trainingsplan-Seite = Trainings-Zentrale: was wird heute trainiert
-// (mit Session-Start), Wochenplan-Übersicht und Fortschritts-Statistik.
-// Bearbeitet wird der Plan in „Ziel & Anpassung“.
+// Trainings-Zentrale in fester Reihenfolge:
+//   1. Heute – Inline-Logging (Stronger-Stil), Timer-Session als Fokus-Modus
+//   2. Cardio-Einstieg (Lauf/Walk)
+//   3. Wochenplan
+//   4. 4-Wochen-Plan-Übersicht
+//   5. Fortschritt (Kurven + Streak/Heatmap)
+//   6. Ganz unten: eine Taste „Trainingsplan anpassen“.
 
 const WOCHENTAGE = [
   { key: "mo", name: "Montag", kurz: "Mo" },
@@ -28,23 +34,28 @@ function heutigerTagKey() {
   return WOCHEN_KEYS[(new Date().getDay() + 6) % 7]
 }
 
-export default function TrainingsplanSeite({ onZiel }) {
+function dateKey(d) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`
+}
+
+export default function TrainingsplanSeite({ onNavigate }) {
   const [wochenplan] = useStored("trainingsplanUebungen", LEER)
   const { profil } = useZiel()
-  const [sessionAktiv, setSessionAktiv] = useState(false)
+  const [fokusModus, setFokusModus] = useState(false)
 
   const tagKey = heutigerTagKey()
   const heuteEintraege = planTag(wochenplan, tagKey)
   const tageWahl = profil.tageWahl ?? standardTage(profil.trainingsTage ?? 3)
   const splitWahl = profil.splitWahl ?? "oberUnter"
+  const einheitName = tagesName(splitWahl, tageWahl, tagKey)
 
-  if (sessionAktiv) {
+  if (fokusModus) {
     return (
       <SessionAnsicht
         eintraege={heuteEintraege}
         profil={profil}
-        einheitName={tagesName(splitWahl, tageWahl, tagKey)}
-        onEnde={() => setSessionAktiv(false)}
+        einheitName={einheitName}
+        onEnde={() => setFokusModus(false)}
       />
     )
   }
@@ -52,93 +63,94 @@ export default function TrainingsplanSeite({ onZiel }) {
   return (
     <div>
       <PageHeader
-        title="Trainingsplan"
+        title="Training"
         subtitle={`${SPLITS[splitWahl]?.name} · ${tageWahl.length}× / Woche`}
-        right={
-          onZiel && (
-            <Button variant="subtle" onClick={onZiel}>
-              Plan bearbeiten →
-            </Button>
-          )
-        }
       />
 
-      <HeuteKarte
+      {/* 1. Heute – Inline-Logging */}
+      <HeuteBlock
         eintraege={heuteEintraege}
-        einheitName={tagesName(splitWahl, tageWahl, tagKey)}
-        onStart={() => setSessionAktiv(true)}
+        einheitName={einheitName}
+        onFokus={() => setFokusModus(true)}
       />
 
+      {/* 2. Wochenplan */}
       <Wochenplan wochenplan={wochenplan} splitWahl={splitWahl} tageWahl={tageWahl} tagKey={tagKey} />
 
+      {/* 3. 4-Wochen-Plan */}
+      <VierWochenPlan wochenplan={wochenplan} splitWahl={splitWahl} tageWahl={tageWahl} />
+
+      {/* 4. Fortschritt */}
       <ProgressStatistik wochenplan={wochenplan} />
+
+      {/* 5. Eine Taste zur Anpassung */}
+      <button
+        onClick={() => onNavigate("anpassung", { fokus: "training" })}
+        className="mt-8 flex w-full items-center justify-between rounded-2xl border border-white/10 bg-surface px-5 py-4 text-left transition-colors hover:border-accent/50"
+      >
+        <span className="flex items-center gap-3">
+          <span className="grid h-10 w-10 place-items-center rounded-xl bg-accent/15 text-accent">
+            {icons.zahnrad("h-5 w-5")}
+          </span>
+          <span>
+            <span className="block font-semibold text-ink">Trainingsplan anpassen</span>
+            <span className="mt-0.5 block text-xs text-muted">Split, Tage, Übungen &amp; Ziele</span>
+          </span>
+        </span>
+        <span className="text-accent">→</span>
+      </button>
     </div>
   )
 }
 
-// ---- Heute: Übungen mit Zielvorgaben abhaken + Session starten ----
-function HeuteKarte({ eintraege, einheitName, onStart }) {
-  const [checks, setChecks] = useStored("checks", {})
+// ---- 1. Heute: Inline-Logging-Karte(n) + Fokus-Modus ----
+function HeuteBlock({ eintraege, einheitName, onFokus }) {
+  const [checks] = useStored("checks", {})
   const heuteKey = heute()
   const tages = checks[heuteKey] ?? {}
   const abgehakt = eintraege.filter((e) => tages.uebungen?.[e.id]).length
-
-  function toggle(id) {
-    const u = { ...(tages.uebungen ?? {}) }
-    u[id] = !u[id]
-    setChecks({ ...checks, [heuteKey]: { ...tages, uebungen: u } })
-  }
+  const alleFertig = eintraege.length > 0 && abgehakt === eintraege.length
 
   return (
-    <section className="relative mt-6 overflow-hidden rounded-2xl border border-accent/30 bg-surface p-5 shadow-[var(--shadow-glow)]">
-      <div className="pointer-events-none absolute -right-16 -top-20 h-48 w-48 rounded-full bg-accent/20 blur-3xl" />
+    <section className="mt-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-faint">
             Heute{einheitName && eintraege.length > 0 ? ` · ${einheitName}` : ""}
           </p>
-          <p className="mt-0.5 text-lg font-semibold text-ink">
-            {eintraege.length === 0 ? "Ruhetag" : `${abgehakt}/${eintraege.length} Übungen erledigt`}
+          <p className="mt-0.5 text-xl font-bold tracking-tight text-ink">
+            {eintraege.length === 0
+              ? "Ruhetag"
+              : alleFertig
+                ? "Training abgeschlossen 💪"
+                : `${abgehakt}/${eintraege.length} Übungen erledigt`}
           </p>
         </div>
         {eintraege.length > 0 && (
-          <Button onClick={onStart} className="px-5 py-2.5">
-            ▶ Session starten
+          <Button variant="subtle" onClick={onFokus} className="gap-1.5">
+            {icons.stats("h-4 w-4")} Fokus-Modus (Timer)
           </Button>
         )}
       </div>
 
-      {eintraege.length > 0 && (
-        <ul className="mt-3 grid gap-x-6 sm:grid-cols-2">
-          {eintraege.map((e) => {
-            const u = uebungVon(e.id)
-            if (!u) return null
-            const check = !!tages.uebungen?.[e.id]
-            return (
-              <li key={e.id} className="flex items-center gap-2.5 border-b border-white/[0.06] py-1.5">
-                <input
-                  type="checkbox"
-                  checked={check}
-                  onChange={() => toggle(e.id)}
-                  className="h-4 w-4 accent-[var(--color-accent)]"
-                />
-                <span className={cx("flex-1 text-sm", check ? "text-faint line-through" : "text-ink/90")}>
-                  {u.name}
-                </span>
-                <span className="text-xs tabular-nums text-muted">
-                  {e.saetze}×{e.wdh}{e.gewicht > 0 ? ` · ${e.gewicht} kg` : ""}
-                </span>
-              </li>
-            )
-          })}
-        </ul>
+      {eintraege.length === 0 ? (
+        <Card className="mt-3 p-6 text-center text-sm text-muted">
+          Heute ist Ruhetag. Genieße die Erholung – Regeneration ist Teil des Plans.
+        </Card>
+      ) : (
+        <div className="mt-3">
+          <InlineLogger eintraege={eintraege} />
+        </div>
       )}
     </section>
   )
 }
 
-// ---- Wochenplan-Übersicht ----
+// ---- 2. Wochenplan-Übersicht ----
 function Wochenplan({ wochenplan, splitWahl, tageWahl, tagKey }) {
+  const [checks] = useStored("checks", {})
+  const heuteKey = heute()
+
   return (
     <section className="mt-8">
       <SectionTitle>Wochenplan</SectionTitle>
@@ -146,6 +158,10 @@ function Wochenplan({ wochenplan, splitWahl, tageWahl, tagKey }) {
         {WOCHENTAGE.map((t) => {
           const eintraege = planTag(wochenplan, t.key)
           const istHeute = t.key === tagKey
+          const fertig =
+            istHeute &&
+            eintraege.length > 0 &&
+            eintraege.every((e) => checks[heuteKey]?.uebungen?.[e.id])
           const geraete = new Set(eintraege.map((e) => uebungVon(e.id)?.geraet === "Körpergewicht" ? "Cali" : "Gym"))
           const modus = eintraege.length === 0 ? null : geraete.size > 1 ? "Mix" : [...geraete][0]
           return (
@@ -163,20 +179,24 @@ function Wochenplan({ wochenplan, splitWahl, tageWahl, tagKey }) {
                 )}>
                   {t.name}
                 </span>
-                {modus && (
+                {fertig ? (
+                  <span className="rounded-full bg-success/15 px-1.5 py-0.5 text-[10px] font-medium text-success-soft">
+                    ✓ fertig
+                  </span>
+                ) : modus ? (
                   <span
                     className={cx(
                       "rounded-full px-1.5 py-0.5 text-[10px] font-medium",
                       modus === "Cali"
-                        ? "bg-emerald-500/15 text-emerald-300"
+                        ? "bg-success/15 text-success-soft"
                         : modus === "Mix"
-                          ? "bg-violet-500/15 text-violet-300"
-                          : "bg-indigo-500/15 text-indigo-300"
+                          ? "bg-amber-500/15 text-amber-300"
+                          : "bg-white/10 text-muted"
                     )}
                   >
                     {modus}
                   </span>
-                )}
+                ) : null}
               </div>
               {eintraege.length === 0 ? (
                 <p className="mt-1.5 text-xs text-faint">Ruhetag</p>
@@ -198,21 +218,88 @@ function Wochenplan({ wochenplan, splitWahl, tageWahl, tagKey }) {
   )
 }
 
-// ---- Session: Timer + Übungen + Satz-Logging + Körperkarte ----
-function SessionAnsicht({ eintraege, profil, einheitName, onEnde }) {
-  const [log, setLog] = useStored("trainingLog", [])
-  const [checks, setChecks] = useStored("checks", {})
+// ---- 4. 4-Wochen-Plan: aktuelle + 3 folgende Wochen mit Abhak-Status ----
+function VierWochenPlan({ wochenplan, splitWahl, tageWahl }) {
+  const [checks] = useStored("checks", {})
   const heuteKey = heute()
+  const basis = montagVon(new Date())
 
+  const wochen = Array.from({ length: 4 }, (_, w) => {
+    const montag = new Date(basis)
+    montag.setDate(montag.getDate() + w * 7)
+    const sonntag = new Date(montag)
+    sonntag.setDate(sonntag.getDate() + 6)
+
+    const tage = WOCHEN_KEYS.filter((k) => tageWahl.includes(k)).map((k) => {
+      const d = new Date(montag)
+      d.setDate(d.getDate() + WOCHEN_KEYS.indexOf(k))
+      const dk = dateKey(d)
+      const eintraege = planTag(wochenplan, k)
+      const vorbei = dk <= heuteKey
+      const fertig =
+        vorbei &&
+        eintraege.length > 0 &&
+        eintraege.every((e) => checks[dk]?.uebungen?.[e.id])
+      return {
+        name: tagesName(splitWahl, tageWahl, k) ?? "Training",
+        anzahl: eintraege.length,
+        fertig,
+      }
+    })
+    return { w, montag, sonntag, tage }
+  })
+
+  const fmt = (d) => `${d.getDate()}.${d.getMonth() + 1}.`
+
+  return (
+    <section className="mt-8">
+      <SectionTitle>4-Wochen-Plan</SectionTitle>
+      <div className="mt-3 grid gap-2 sm:grid-cols-2">
+        {wochen.map(({ w, montag, sonntag, tage }) => (
+          <Card key={w} className="p-4">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-semibold text-ink">
+                Woche {w + 1}
+                {w === 0 && (
+                  <span className="ml-2 rounded-full bg-accent/15 px-2 py-0.5 text-[10px] font-medium text-accent-soft">
+                    aktuell
+                  </span>
+                )}
+              </span>
+              <span className="text-xs text-faint">{fmt(montag)}–{fmt(sonntag)}</span>
+            </div>
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              {tage.map((t, i) => (
+                <span
+                  key={i}
+                  className={cx(
+                    "flex items-center gap-1 rounded-lg border px-2 py-1 text-xs",
+                    t.fertig
+                      ? "border-success/40 bg-success/10 text-success-soft"
+                      : "border-white/10 bg-surface-2 text-muted"
+                  )}
+                >
+                  {t.fertig && <span>✓</span>}
+                  {t.name}
+                  <span className="text-[10px] text-faint">{t.anzahl}</span>
+                </span>
+              ))}
+              {tage.length === 0 && <span className="text-xs text-faint">Keine Trainingstage gewählt.</span>}
+            </div>
+          </Card>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+// ---- Session: Timer + Inline-Logging (Fokus-Modus) ----
+function SessionAnsicht({ eintraege, profil, einheitName, onEnde }) {
   const [phase, setPhase] = useState("setup") // setup | laeuft
   const [minuten, setMinuten] = useState(String(profil.zeitProEinheit ?? 60))
   const [ende, setEnde] = useState(null)
   const [pausenRest, setPausenRest] = useState(null)
   const [, setTick] = useState(0)
-
-  const [aktiv, setAktiv] = useState(eintraege[0]?.id ?? null)
-  const [gewicht, setGewicht] = useState("")
-  const [wdh, setWdh] = useState("")
 
   // Sekündlicher Tick, solange der Timer läuft.
   useEffect(() => {
@@ -226,17 +313,9 @@ function SessionAnsicht({ eintraege, profil, einheitName, onEnde }) {
   const gesamtSek = Number(minuten) * 60 || 1
   const fortschritt = phase === "laeuft" ? 1 - restSek / gesamtSek : 0
 
-  const uebung = uebungVon(aktiv)
-  const ziel = eintraege.find((e) => e.id === aktiv)
-  const muskeln = uebung ? new Set([...uebung.muskeln, ...(uebung.sekundaer ?? [])]) : new Set()
-  const tages = checks[heuteKey] ?? {}
-  const vorschlag = aktiv ? overloadVorschlag(log, aktiv, heuteKey) : null
-  const heutigeSaetze = log.filter((s) => s.datum === heuteKey && s.uebungId === aktiv)
-
   function starten() {
     setEnde(Date.now() + (Number(minuten) || 60) * 60 * 1000)
     setPhase("laeuft")
-    if (aktiv) waehleUebung(aktiv) // Eingaben mit Vorschlag/Plan vorbelegen
   }
   function pauseToggle() {
     if (pausenRest === null) {
@@ -247,52 +326,14 @@ function SessionAnsicht({ eintraege, profil, einheitName, onEnde }) {
     }
   }
 
-  function hakeAb(id, wert = true) {
-    // Funktionales Update: bleibt auch bei schnellen Folge-Klicks korrekt.
-    setChecks((alt) => {
-      const tag = alt[heuteKey] ?? {}
-      return {
-        ...alt,
-        [heuteKey]: { ...tag, uebungen: { ...(tag.uebungen ?? {}), [id]: wert } },
-      }
-    })
-  }
-
-  // Übung wechseln: Eingaben mit Overload-Vorschlag bzw. Planvorgabe füllen.
-  function waehleUebung(id) {
-    setAktiv(id)
-    const e = eintraege.find((x) => x.id === id)
-    const v = overloadVorschlag(log, id, heuteKey)
-    setGewicht(String(v?.gewicht ?? e?.gewicht ?? "") || "")
-    setWdh(String(v?.wdh ?? e?.wdh ?? "") || "")
-  }
-
-  function satzSpeichern(e) {
-    e.preventDefault()
-    const w = Number(wdh)
-    if (!aktiv || w < 1) return
-    const uebungId = aktiv
-    const zielSaetze = ziel?.saetze ?? 1
-    setLog((alt) => {
-      const neu = [
-        ...alt,
-        { id: Date.now() + Math.random(), datum: heuteKey, uebungId, gewicht: Number(gewicht) || 0, wdh: w },
-      ]
-      // Abhaken, sobald die geplanten Sätze erreicht sind.
-      const anzahl = neu.filter((s) => s.datum === heuteKey && s.uebungId === uebungId).length
-      if (anzahl >= zielSaetze) hakeAb(uebungId)
-      return neu
-    })
-  }
-
   if (phase === "setup") {
     return (
       <div>
         <button onClick={onEnde} className="text-xs font-medium text-muted transition-colors hover:text-ink">
-          ← Abbrechen
+          ← Zurück
         </button>
         <h1 className="mt-4 text-2xl font-bold tracking-tight text-ink">
-          Session{einheitName ? ` · ${einheitName}` : ""}
+          Fokus-Modus{einheitName ? ` · ${einheitName}` : ""}
         </h1>
         <p className="mt-1 text-sm text-muted">
           Timer einstellen, dann geht’s los. {eintraege.length} Übungen stehen an.
@@ -311,21 +352,6 @@ function SessionAnsicht({ eintraege, profil, einheitName, onEnde }) {
             ▶ Los geht’s
           </Button>
         </Card>
-
-        <ul className="mt-6 max-w-sm space-y-1.5">
-          {eintraege.map((e) => {
-            const u = uebungVon(e.id)
-            return u ? (
-              <li key={e.id} className="flex items-center gap-2 text-sm text-muted">
-                <span className="h-1.5 w-1.5 rounded-full bg-accent/60" />
-                <span className="flex-1">{u.name}</span>
-                <span className="text-xs tabular-nums text-faint">
-                  {e.saetze}×{e.wdh}{e.gewicht > 0 ? ` · ${e.gewicht} kg` : ""}
-                </span>
-              </li>
-            ) : null
-          })}
-        </ul>
       </div>
     )
   }
@@ -336,12 +362,12 @@ function SessionAnsicht({ eintraege, profil, einheitName, onEnde }) {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-faint">
-            Session{einheitName ? ` · ${einheitName}` : ""}
+            Fokus-Modus{einheitName ? ` · ${einheitName}` : ""}
             {pausenRest !== null && " · Pause"}
           </p>
           <p className={cx(
             "text-5xl font-bold tabular-nums tracking-tight",
-            restSek === 0 ? "text-rose-400" : "text-ink"
+            restSek === 0 ? "text-success-soft" : "text-ink"
           )}>
             {restSek === 0 ? "Zeit um!" : zeit}
           </p>
@@ -350,169 +376,61 @@ function SessionAnsicht({ eintraege, profil, einheitName, onEnde }) {
           <Button variant="subtle" onClick={pauseToggle}>
             {pausenRest !== null ? "▶ Weiter" : "❚❚ Pause"}
           </Button>
-          <Button onClick={onEnde}>Session beenden</Button>
+          <Button variant="success" onClick={onEnde}>Beenden</Button>
         </div>
       </div>
       <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/10">
         <div className="h-full rounded-full bg-accent-gradient transition-all" style={{ width: `${fortschritt * 100}%` }} />
       </div>
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_300px]">
-        <div>
-          {/* Übungsliste mit Satz-Fortschritt (geloggt / geplant) */}
-          <ul className="space-y-1.5">
-            {eintraege.map((e) => {
-              const u = uebungVon(e.id)
-              if (!u) return null
-              const istAktiv = e.id === aktiv
-              const check = !!tages.uebungen?.[e.id]
-              const saetze = log.filter((s) => s.datum === heuteKey && s.uebungId === e.id).length
-              return (
-                <li key={e.id}>
-                  <button
-                    onClick={() => waehleUebung(e.id)}
-                    className={cx(
-                      "flex w-full items-center gap-3 rounded-xl border px-3 py-2.5 text-left transition-colors",
-                      istAktiv ? "border-accent/60 bg-accent/10" : "border-white/[0.06] bg-surface hover:border-white/25"
-                    )}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={check}
-                      onChange={(ev) => hakeAb(e.id, ev.target.checked)}
-                      onClick={(ev) => ev.stopPropagation()}
-                      className="h-4 w-4 accent-[var(--color-accent)]"
-                    />
-                    <span className={cx("flex-1 text-sm font-medium", check ? "text-faint line-through" : "text-ink")}>
-                      {u.name}
-                    </span>
-                    <span className="text-xs tabular-nums text-muted">
-                      {e.wdh} Wdh.{e.gewicht > 0 ? ` @ ${e.gewicht} kg` : ""}
-                    </span>
-                    <span
-                      className={cx(
-                        "rounded-full px-2 py-0.5 text-[10px] font-medium tabular-nums",
-                        saetze >= e.saetze ? "bg-emerald-500/15 text-emerald-300" : "bg-white/10 text-muted"
-                      )}
-                    >
-                      {saetze}/{e.saetze} Sätze
-                    </span>
-                  </button>
-                </li>
-              )
-            })}
-          </ul>
-
-          {/* Satz-Logging für die aktive Übung */}
-          {uebung && (
-            <Card className="mt-5 p-4">
-              <div className="flex flex-wrap items-baseline justify-between gap-2">
-                <p className="text-sm font-semibold text-ink">{uebung.name}</p>
-                {ziel && (
-                  <p className="text-xs text-muted">
-                    Plan: {ziel.saetze} × {ziel.wdh}
-                    {ziel.gewicht > 0 ? ` @ ${ziel.gewicht} kg` : ""} ·{" "}
-                    {heutigeSaetze.length}/{ziel.saetze} erledigt
-                  </p>
-                )}
-              </div>
-              {vorschlag && (
-                <p className="mt-1 rounded-lg bg-amber-500/15 px-2.5 py-1.5 text-xs text-amber-300">
-                  ↗ {vorschlag.text}
-                </p>
-              )}
-              <form onSubmit={satzSpeichern} className="mt-3 flex flex-wrap items-end gap-2">
-                <label className={labelCls}>
-                  Gewicht (kg)
-                  <input
-                    type="number" min="0" step="0.5" value={gewicht}
-                    onChange={(e) => setGewicht(e.target.value)}
-                    placeholder={uebung.geraet === "Körpergewicht" ? "0 = Körper" : ""}
-                    className="mt-1 w-28 rounded-lg border border-white/10 bg-surface-2 px-3 py-2 text-sm text-ink outline-none placeholder:text-faint focus:border-accent focus:ring-2 focus:ring-accent/30"
-                  />
-                </label>
-                <label className={labelCls}>
-                  Wdh.
-                  <input
-                    type="number" min="1" value={wdh}
-                    onChange={(e) => setWdh(e.target.value)}
-                    className="mt-1 w-20 rounded-lg border border-white/10 bg-surface-2 px-3 py-2 text-sm text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/30"
-                  />
-                </label>
-                <Button type="submit">+ Satz</Button>
-              </form>
-
-              {heutigeSaetze.length > 0 && (
-                <ul className="mt-3 space-y-1">
-                  {heutigeSaetze.map((s, i) => (
-                    <li key={s.id} className="group flex items-center gap-3 text-sm text-muted">
-                      <span className="w-14 text-xs text-faint">Satz {i + 1}</span>
-                      <span className="flex-1 text-ink/90">
-                        {s.gewicht > 0 ? `${s.gewicht} kg × ` : ""}{s.wdh} Wdh.
-                        <span className="ml-2 text-xs text-faint">e1RM {e1rm(s.gewicht, s.wdh)}</span>
-                      </span>
-                      <button
-                        onClick={() => setLog((alt) => alt.filter((x) => x.id !== s.id))}
-                        className="text-faint opacity-0 transition-opacity hover:text-rose-400 group-hover:opacity-100"
-                      >
-                        ×
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </Card>
-          )}
-        </div>
-
-        {/* Männchen: zeigt die Muskeln der aktiven Übung */}
-        <div className="lg:sticky lg:top-6 lg:self-start">
-          <Card className="p-4">
-            <Koerperkarte aktiv={muskeln} />
-            <p className="mt-1 text-center text-xs text-muted">
-              {uebung ? `${uebung.name} trainiert:` : "Übung wählen"}
-            </p>
-            <div className="mt-1.5 flex flex-wrap justify-center gap-1">
-              {uebung?.muskeln.map((m) => (
-                <span key={m} className="rounded-full bg-accent/15 px-2 py-0.5 text-[10px] font-medium text-accent-soft">
-                  {MUSKELGRUPPEN[m]?.name}
-                </span>
-              ))}
-              {(uebung?.sekundaer ?? []).map((m) => (
-                <span key={m} className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] text-muted">
-                  {MUSKELGRUPPEN[m]?.name}
-                </span>
-              ))}
-            </div>
-          </Card>
-        </div>
+      {/* Inline-Logging wie auf der Hauptansicht */}
+      <div className="mt-6">
+        <InlineLogger eintraege={eintraege} />
       </div>
     </div>
   )
 }
 
-// ---- Statistik: Verbesserung pro Übung als Diagramm ----
+// ---- 5. Fortschritt: Kurven (Gewicht/Wdh/Leistung) + Streak/Heatmap ----
+const METRIKEN = [
+  { id: "gewicht", label: "Gewicht", einheitGym: "kg (e1RM)", einheitCali: "Wdh." },
+  { id: "wdh", label: "Wdh.", einheitGym: "Wdh.", einheitCali: "Wdh." },
+  { id: "leistung", label: "Leistung", einheitGym: "kg Vol.", einheitCali: "Vol." },
+]
+
 function ProgressStatistik({ wochenplan }) {
   const [log] = useStored("trainingLog", [])
 
-  // Übungen mit Log-Einträgen zuerst, dann restliche aus dem Plan.
   const geloggt = [...new Set(log.map((s) => s.uebungId))]
   const planIds = Object.values(wochenplan).flat().map((e) => normEintrag(e).id)
   const imPlan = [...new Set(planIds)].filter((id) => !geloggt.includes(id))
   const auswahlIds = [...geloggt, ...imPlan]
   const [gewaehlt, setGewaehlt] = useState(null)
+  const [metrik, setMetrik] = useState("gewicht")
   const aktivId = gewaehlt ?? auswahlIds[0]
   const uebung = uebungVon(aktivId)
+  const cali = uebung?.geraet === "Körpergewicht"
 
   const verlauf = aktivId ? verlaufVon(log, aktivId) : []
-  const koerpergewicht = uebung?.geraet === "Körpergewicht"
-  const einheit = koerpergewicht ? "Wdh." : "kg (e1RM)"
+  const metaMetrik = METRIKEN.find((m) => m.id === metrik)
+  const einheit = cali ? metaMetrik.einheitCali : metaMetrik.einheitGym
 
-  const erster = verlauf[0]
-  const letzter = verlauf[verlauf.length - 1]
+  // Rohverlauf auf die gewählte Metrik abbilden.
+  const punkte = verlauf.map((v) => ({
+    datum: v.datum,
+    wert:
+      metrik === "leistung"
+        ? v.volumen
+        : metrik === "wdh"
+          ? Math.max(...v.saetze.map((s) => s.wdh))
+          : v.best,
+  }))
+
+  const erster = punkte[0]
+  const letzter = punkte[punkte.length - 1]
   const steigerung =
-    erster && letzter && erster.best > 0
-      ? Math.round(((letzter.best - erster.best) / erster.best) * 100)
+    erster && letzter && erster.wert > 0
+      ? Math.round(((letzter.wert - erster.wert) / erster.wert) * 100)
       : null
 
   return (
@@ -541,48 +459,64 @@ function ProgressStatistik({ wochenplan }) {
       </SectionTitle>
 
       <Card className="mt-3 p-5">
-        {verlauf.length === 0 ? (
+        {/* Metrik-Tabs (Gewicht / Wdh / Leistung) */}
+        <div className="flex gap-1 rounded-lg border border-white/10 bg-surface-2 p-0.5 text-xs">
+          {METRIKEN.map((m) => (
+            <button
+              key={m.id}
+              onClick={() => setMetrik(m.id)}
+              className={cx(
+                "flex-1 rounded-md px-2.5 py-1.5 font-medium transition-colors",
+                metrik === m.id ? "bg-accent-gradient on-accent" : "text-muted hover:text-ink"
+              )}
+            >
+              {m.label}
+            </button>
+          ))}
+        </div>
+
+        {punkte.length === 0 ? (
           <p className="py-6 text-center text-sm text-muted">
-            Noch keine Sätze geloggt – starte oben eine Session und trage
-            Gewicht &amp; Wiederholungen ein.
+            Noch keine Sätze geloggt – hake oben Sätze ab, dann erscheint hier deine Kurve.
           </p>
         ) : (
           <>
-            <div className="flex flex-wrap gap-6 text-sm">
+            <div className="mt-4 flex flex-wrap gap-6 text-sm">
               <div>
                 <p className="text-xs text-faint">Bestwert</p>
                 <p className="font-semibold text-ink">
-                  {Math.max(...verlauf.map((v) => v.best))} {einheit}
+                  {Math.max(...punkte.map((v) => v.wert))} {einheit}
                 </p>
               </div>
               <div>
                 <p className="text-xs text-faint">Letzte Einheit</p>
-                <p className="font-semibold text-ink">
-                  {letzter.best} {einheit} · {letzter.saetze.length} Sätze
-                </p>
+                <p className="font-semibold text-ink">{letzter.wert} {einheit}</p>
               </div>
-              {steigerung !== null && verlauf.length > 1 && (
+              {steigerung !== null && punkte.length > 1 && (
                 <div>
                   <p className="text-xs text-faint">Seit Beginn</p>
-                  <p className={cx("font-semibold", steigerung >= 0 ? "text-emerald-400" : "text-rose-400")}>
+                  <p className={cx("font-semibold", steigerung >= 0 ? "text-success-soft" : "text-rose-400")}>
                     {steigerung > 0 ? "+" : ""}{steigerung} %
                   </p>
                 </div>
               )}
             </div>
             <div className="mt-4">
-              <Diagramm verlauf={verlauf} einheit={einheit} />
+              <Diagramm punkte={punkte} einheit={einheit} />
             </div>
           </>
         )}
       </Card>
+
+      {/* Streak + Heatmap + Diese Woche */}
+      <TrainingsHeatmap />
     </section>
   )
 }
 
-// Einfaches SVG-Liniendiagramm des Bestwerts (e1RM bzw. Wdh.) pro Einheit.
-function Diagramm({ verlauf, einheit }) {
-  if (verlauf.length < 2) {
+// Einfaches SVG-Liniendiagramm eines Wertverlaufs.
+function Diagramm({ punkte, einheit }) {
+  if (punkte.length < 2) {
     return (
       <p className="text-xs text-muted">
         Nach der zweiten Einheit erscheint hier deine Fortschrittskurve.
@@ -591,7 +525,7 @@ function Diagramm({ verlauf, einheit }) {
   }
 
   const W = 560, H = 180, P = 30
-  const werte = verlauf.map((v) => v.best)
+  const werte = punkte.map((v) => v.wert)
   let min = Math.min(...werte)
   let max = Math.max(...werte)
   if (min === max) { min -= 1; max += 1 }
@@ -599,9 +533,9 @@ function Diagramm({ verlauf, einheit }) {
   min -= spanne * 0.1
   max += spanne * 0.1
 
-  const x = (i) => P + (i * (W - 2 * P)) / (verlauf.length - 1)
+  const x = (i) => P + (i * (W - 2 * P)) / (punkte.length - 1)
   const y = (v) => H - P - ((v - min) * (H - 2 * P)) / (max - min)
-  const punkte = verlauf.map((v, i) => `${x(i)},${y(v.best)}`).join(" ")
+  const linie = punkte.map((v, i) => `${x(i)},${y(v.wert)}`).join(" ")
   const datumKurz = (key) => {
     const d = new Date(`${key}T00:00:00`)
     return `${d.getDate()}.${d.getMonth() + 1}.`
@@ -611,11 +545,10 @@ function Diagramm({ verlauf, einheit }) {
     <svg viewBox={`0 0 ${W} ${H}`} className="w-full">
       <defs>
         <linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.35" />
-          <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0" />
+          <stop offset="0%" stopColor="#f5a524" stopOpacity="0.35" />
+          <stop offset="100%" stopColor="#f5a524" stopOpacity="0" />
         </linearGradient>
       </defs>
-      {/* Gitterlinien */}
       {[0.25, 0.5, 0.75].map((f) => (
         <line
           key={f}
@@ -624,24 +557,22 @@ function Diagramm({ verlauf, einheit }) {
           stroke="#ffffff" strokeOpacity="0.06"
         />
       ))}
-      {/* Fläche unter der Kurve */}
       <polygon
-        points={`${x(0)},${H - P} ${punkte} ${x(verlauf.length - 1)},${H - P}`}
+        points={`${x(0)},${H - P} ${linie} ${x(punkte.length - 1)},${H - P}`}
         fill="url(#chartFill)"
       />
-      <polyline points={punkte} fill="none" stroke="#a5b4fc" strokeWidth="2.5" strokeLinejoin="round" />
-      {verlauf.map((v, i) => (
-        <circle key={i} cx={x(i)} cy={y(v.best)} r={i === verlauf.length - 1 ? 5 : 3.5} fill="#a5b4fc" />
+      <polyline points={linie} fill="none" stroke="#fcd34d" strokeWidth="2.5" strokeLinejoin="round" />
+      {punkte.map((v, i) => (
+        <circle key={i} cx={x(i)} cy={y(v.wert)} r={i === punkte.length - 1 ? 5 : 3.5} fill="#fcd34d" />
       ))}
-      {/* Beschriftung: letzter Wert + Achsen-Enden */}
-      <text x={x(verlauf.length - 1)} y={y(verlauf[verlauf.length - 1].best) - 10} textAnchor="end" fill="#f3f4f8" style={{ fontSize: 12, fontWeight: 600 }}>
-        {verlauf[verlauf.length - 1].best} {einheit}
+      <text x={x(punkte.length - 1)} y={y(punkte[punkte.length - 1].wert) - 10} textAnchor="end" fill="#f4f5f8" style={{ fontSize: 12, fontWeight: 600 }}>
+        {punkte[punkte.length - 1].wert} {einheit}
       </text>
       <text x={P} y={H - 8} fill="#6b7280" style={{ fontSize: 10 }}>
-        {datumKurz(verlauf[0].datum)}
+        {datumKurz(punkte[0].datum)}
       </text>
       <text x={W - P} y={H - 8} textAnchor="end" fill="#6b7280" style={{ fontSize: 10 }}>
-        {datumKurz(verlauf[verlauf.length - 1].datum)}
+        {datumKurz(punkte[punkte.length - 1].datum)}
       </text>
     </svg>
   )

@@ -9,8 +9,8 @@ const MONATE = [
 ]
 
 export const EINTRAG_TYPEN = {
-  training: { chip: "bg-indigo-500/20 text-indigo-300", punkt: "bg-indigo-400", name: "Training" },
-  mahlzeit: { chip: "bg-amber-500/20 text-amber-300", punkt: "bg-amber-400", name: "Ernährung" },
+  training: { chip: "bg-accent/20 text-accent-soft", punkt: "bg-accent", name: "Training" },
+  mahlzeit: { chip: "bg-emerald-500/20 text-emerald-300", punkt: "bg-emerald-400", name: "Ernährung" },
   fasten: { chip: "bg-violet-500/20 text-violet-300", punkt: "bg-violet-400", name: "Fasten" },
   termin: { chip: "bg-white/10 text-muted", punkt: "bg-slate-400", name: "Termin" },
 }
@@ -71,7 +71,7 @@ export default function Kalender({ eintraegeAm, legende = [], onNeu }) {
                 className={cx(
                   "rounded-md px-2.5 py-1 font-medium transition-colors",
                   ansicht === a.key
-                    ? "bg-accent-gradient text-white"
+                    ? "bg-accent-gradient on-accent"
                     : "text-muted hover:text-ink"
                 )}
               >
@@ -100,7 +100,7 @@ export default function Kalender({ eintraegeAm, legende = [], onNeu }) {
           {onNeu && (
             <button
               onClick={() => onNeu(ansicht === "tag" ? cursor : heuteKey)}
-              className="rounded-lg bg-accent-gradient px-3 py-1 text-xs font-semibold text-white shadow-[var(--shadow-glow)] hover:brightness-110"
+              className="rounded-lg bg-accent-gradient px-3 py-1 text-xs font-semibold on-accent shadow-[var(--shadow-glow)] hover:brightness-105"
             >
               + Neu
             </button>
