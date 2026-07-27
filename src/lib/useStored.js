@@ -1,5 +1,6 @@
 import { useCallback, useSyncExternalStore } from "react"
 import { supabase, cloudAktiv } from "./supabase"
+import { migriereWert } from "./migration"
 
 // Geteilter Speicher: Alle Komponenten mit demselben Schlüssel sehen
 // Änderungen sofort. Als Basis dient localStorage (funktioniert offline
@@ -17,11 +18,11 @@ function eintragFuer(key, fallback) {
     let wert
     try {
       const raw = localStorage.getItem(key)
-      wert = raw ? JSON.parse(raw) : fallback
+      wert = raw ? migriereWert(key, JSON.parse(raw), fallback) : fallback
     } catch {
       wert = fallback
     }
-    speicher.set(key, { wert, hoerer: new Set(), geladen: false })
+    speicher.set(key, { wert, hoerer: new Set(), geladen: false, fallback })
   }
   return speicher.get(key)
 }
@@ -46,7 +47,7 @@ async function ladeVonCloud(key) {
     return
   }
   if (data && data.value != null) {
-    e.wert = data.value
+    e.wert = migriereWert(key, data.value, e.fallback)
     localStorage.setItem(key, JSON.stringify(e.wert))
     benachrichtige(e)
   } else {
@@ -106,9 +107,10 @@ export async function setzeCloudSession(neuerUserId) {
         if (!row || !row.key) return
         const e = speicher.get(row.key)
         if (!e) return
-        const neu = JSON.stringify(row.value)
+        const migval = migriereWert(row.key, row.value, e.fallback)
+        const neu = JSON.stringify(migval)
         if (JSON.stringify(e.wert) !== neu) {
-          e.wert = row.value
+          e.wert = migval
           localStorage.setItem(row.key, neu)
           benachrichtige(e)
         }
@@ -124,6 +126,36 @@ export function schreibeStore(key, fallback, neu) {
   localStorage.setItem(key, JSON.stringify(e.wert))
   benachrichtige(e)
   speichereInCloud(key, e.wert)
+}
+
+// Alle App-Daten als einfaches Objekt (für Backup/Export). Supabase-Auth
+// (sb-…) wird ausgelassen – es gehört nicht in ein Daten-Backup.
+export function exportiereDaten() {
+  const daten = {}
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i)
+    if (!key || key.startsWith("sb-")) continue
+    try {
+      daten[key] = JSON.parse(localStorage.getItem(key))
+    } catch {
+      /* nicht-JSON-Schlüssel überspringen */
+    }
+  }
+  return { app: "mogged", version: 1, exportiertAm: new Date().toISOString(), daten }
+}
+
+// Spielt ein Backup ein: schreibt jeden Schlüssel (lokal + Cloud, migriert)
+// und benachrichtigt offene Komponenten. Gibt die Zahl der Schlüssel zurück.
+export function importiereDaten(backup) {
+  const daten = backup?.daten
+  if (!daten || typeof daten !== "object") throw new Error("Ungültiges Backup")
+  let n = 0
+  for (const [key, wert] of Object.entries(daten)) {
+    if (key.startsWith("sb-")) continue
+    schreibeStore(key, undefined, migriereWert(key, wert, undefined))
+    n++
+  }
+  return n
 }
 
 export default function useStored(key, fallback) {
