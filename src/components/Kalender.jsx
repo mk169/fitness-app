@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { heute } from "../lib/datum"
+import { farbeVon } from "../lib/habits"
 import { cx } from "./ui"
 
 const WOCHENTAGE = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"]
@@ -33,7 +34,7 @@ function montagVon(d) {
 // Wiederverwendbarer Kalender mit Tages-, Wochen- und Monatsansicht.
 // eintraegeAm(key) liefert die Einträge eines Tages:
 //   { typ, label, zeit?, onRemove? }
-export default function Kalender({ eintraegeAm, legende = [], onNeu }) {
+export default function Kalender({ eintraegeAm, legende = [], onNeu, tagStatus, baender }) {
   const [ansicht, setAnsicht] = useState("monat")
   const [cursor, setCursor] = useState(heute())
   const heuteKey = heute()
@@ -114,6 +115,8 @@ export default function Kalender({ eintraegeAm, legende = [], onNeu }) {
             cursorDate={cursorDate}
             heuteKey={heuteKey}
             eintraegeAm={eintraegeAm}
+            tagStatus={tagStatus}
+            baender={baender}
             onTagKlick={(key) => {
               setCursor(key)
               setAnsicht("tag")
@@ -125,6 +128,7 @@ export default function Kalender({ eintraegeAm, legende = [], onNeu }) {
             cursorDate={cursorDate}
             heuteKey={heuteKey}
             eintraegeAm={eintraegeAm}
+            baender={baender}
             onTagKlick={(key) => {
               setCursor(key)
               setAnsicht("tag")
@@ -150,7 +154,7 @@ export default function Kalender({ eintraegeAm, legende = [], onNeu }) {
   )
 }
 
-function MonatsAnsicht({ cursorDate, heuteKey, eintraegeAm, onTagKlick }) {
+function MonatsAnsicht({ cursorDate, heuteKey, eintraegeAm, tagStatus, baender, onTagKlick }) {
   const jahr = cursorDate.getFullYear()
   const monat = cursorDate.getMonth()
   const tageImMonat = new Date(jahr, monat + 1, 0).getDate()
@@ -174,23 +178,45 @@ function MonatsAnsicht({ cursorDate, heuteKey, eintraegeAm, onTagKlick }) {
           const key = `${jahr}-${String(monat + 1).padStart(2, "0")}-${String(tag).padStart(2, "0")}`
           const eintraege = eintraegeAm(key)
           const istHeute = key === heuteKey
+          const status = tagStatus?.(key)
+          const zeigeStatus =
+            status && status.gesamt > 0 && key <= heuteKey &&
+            (status.erledigt > 0 || key === heuteKey)
+          const bands = baender?.(key) ?? []
           return (
             <button
               key={key}
               onClick={() => onTagKlick(key)}
               className="flex min-h-16 flex-col items-stretch gap-0.5 bg-surface p-1 text-left transition-colors hover:bg-surface-2"
             >
-              <span
-                className={cx(
-                  "self-start rounded px-1 text-xs",
-                  istHeute
-                    ? "bg-accent-gradient font-semibold text-white"
-                    : "text-muted"
+              <div className="flex items-center justify-between">
+                <span
+                  className={cx(
+                    "rounded px-1 text-xs",
+                    istHeute ? "bg-accent-gradient font-semibold text-white" : "text-muted"
+                  )}
+                >
+                  {tag}
+                </span>
+                {zeigeStatus && (
+                  <span
+                    className={cx(
+                      "text-[9px] font-semibold tabular-nums",
+                      status.erledigt === status.gesamt ? "text-emerald-400" : "text-faint"
+                    )}
+                  >
+                    {status.erledigt === status.gesamt ? "✓" : `${status.erledigt}/${status.gesamt}`}
+                  </span>
                 )}
-              >
-                {tag}
-              </span>
-              {eintraege.slice(0, 2).map((e, j) => (
+              </div>
+              {bands.slice(0, 2).map((b, j) => (
+                <span
+                  key={`b${j}`}
+                  title={b.name}
+                  className={cx("h-1 rounded-full", farbeVon(b.farbe).dot)}
+                />
+              ))}
+              {eintraege.slice(0, bands.length > 0 ? 1 : 2).map((e, j) => (
                 <span
                   key={j}
                   className={cx("truncate rounded px-1 text-[10px] leading-4", EINTRAG_TYPEN[e.typ].chip)}
@@ -198,11 +224,6 @@ function MonatsAnsicht({ cursorDate, heuteKey, eintraegeAm, onTagKlick }) {
                   {e.label}
                 </span>
               ))}
-              {eintraege.length > 2 && (
-                <span className="px-1 text-[10px] text-faint">
-                  +{eintraege.length - 2} weitere
-                </span>
-              )}
             </button>
           )
         })}
@@ -219,7 +240,7 @@ function MonatsAnsicht({ cursorDate, heuteKey, eintraegeAm, onTagKlick }) {
   )
 }
 
-function WochenAnsicht({ cursorDate, heuteKey, eintraegeAm, onTagKlick }) {
+function WochenAnsicht({ cursorDate, heuteKey, eintraegeAm, baender, onTagKlick }) {
   const montag = montagVon(cursorDate)
 
   return (
@@ -244,6 +265,14 @@ function WochenAnsicht({ cursorDate, heuteKey, eintraegeAm, onTagKlick }) {
             >
               {WOCHENTAGE[i]} {d.getDate()}.
             </span>
+            {(baender?.(key) ?? []).map((b, j) => (
+              <span
+                key={`b${j}`}
+                className={cx("truncate rounded px-1.5 py-0.5 text-[10px] font-medium", farbeVon(b.farbe).chip)}
+              >
+                {b.name}
+              </span>
+            ))}
             {eintraege.map((e, j) => (
               <span
                 key={j}
