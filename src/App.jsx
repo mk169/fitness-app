@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react"
-import { setzeCloudSession } from "./lib/useStored"
+import useStored, { setzeCloudSession } from "./lib/useStored"
 import { supabase, cloudAktiv } from "./lib/supabase"
 import { cx, icons } from "./components/ui"
 import Login from "./components/Login"
+import Onboarding from "./components/Onboarding"
 import Dashboard from "./components/Dashboard"
 import ZielSeite from "./components/ZielSeite"
 import TrainingsplanSeite from "./components/TrainingsplanSeite"
@@ -106,6 +107,8 @@ export default function App() {
   // Ohne Cloud gibt es keinen Login – dann gilt die App sofort als bereit.
   const [session, setSession] = useState(null)
   const [authBereit, setAuthBereit] = useState(!cloudAktiv)
+  // Erst-Einrichtung: bis abgeschlossen wird der Onboarding-Assistent gezeigt.
+  const [onboardingFertig, setOnboardingFertig] = useStored("onboardingFertig", false)
 
   // Auth-Status verfolgen (nur wenn Supabase konfiguriert ist).
   useEffect(() => {
@@ -133,9 +136,10 @@ export default function App() {
     )
   }
   if (cloudAktiv && !session) return <Login />
+  if (!onboardingFertig) return <Onboarding onFertig={() => setOnboardingFertig(true)} />
 
   return (
-    <div className="min-h-screen bg-bg text-ink">
+    <div className="min-h-screen text-ink">
       <Sidebar seite={seite} onNavigate={navigiere} session={session} />
       <BottomBar seite={seite} onNavigate={navigiere} />
 

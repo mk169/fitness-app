@@ -51,6 +51,7 @@ const TAG_LABELS = [
 
 export default function ZielSeite() {
   const { profil, setProfil, plan } = useZiel()
+  const [, setOnboardingFertig] = useStored("onboardingFertig", false)
   const set = (feld) => (e) => {
     const v = e.target.value
     const zahl = ["alter", "groesse", "gewicht", "zielGewicht", "kfa", "zeitProEinheit"]
@@ -62,6 +63,14 @@ export default function ZielSeite() {
       <PageHeader
         title="Ziel & Anpassung"
         subtitle="Ziel, Trainingsplan und Ernährung – alles hier einstellbar, jederzeit änderbar."
+        right={
+          <button
+            onClick={() => setOnboardingFertig(false)}
+            className="rounded-lg border border-white/10 bg-surface-2 px-3 py-1.5 text-xs font-medium text-muted transition-colors hover:border-white/25 hover:text-ink"
+          >
+            Einrichtung neu starten
+          </button>
+        }
       />
 
       <div className="mt-6 grid gap-4 lg:grid-cols-2">
