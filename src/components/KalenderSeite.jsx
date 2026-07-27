@@ -11,7 +11,7 @@ import {
   PROGRAMM_TYPEN, typInfo, programmStatus, aktiveProgramme,
 } from "../lib/programme"
 import Kalender, { schluessel, datumLang } from "./Kalender"
-import { Card, PageHeader, SectionTitle, Button, inputCls, labelCls, cx } from "./ui"
+import { Card, PageHeader, SectionTitle, Button, Ring, inputCls, labelCls, cx } from "./ui"
 
 // Kalender-Seite als Habit-Tracker: Tagesansicht zum Abhaken mit Streaks,
 // Phasen/Programme über Zeiträume und eine Monats-/Wochenübersicht, die den
@@ -33,28 +33,6 @@ function useProgramme() {
     [programme, fastenPhasen]
   )
   return { programme, setProgramme, alle }
-}
-
-// ---- Fortschritts-Ring ---------------------------------------------------
-function Ring({ erledigt, gesamt, size = 46 }) {
-  const r = (size - 6) / 2
-  const c = 2 * Math.PI * r
-  const p = gesamt ? erledigt / gesamt : 0
-  return (
-    <svg width={size} height={size} className="shrink-0">
-      <circle cx={size / 2} cy={size / 2} r={r} fill="none" strokeWidth="5" style={{ stroke: "var(--ov-10)" }} />
-      <circle
-        cx={size / 2} cy={size / 2} r={r} fill="none" strokeWidth="5" strokeLinecap="round"
-        strokeDasharray={c} strokeDashoffset={c * (1 - p)}
-        transform={`rotate(-90 ${size / 2} ${size / 2})`}
-        style={{ stroke: "var(--color-accent)", transition: "stroke-dashoffset .35s ease" }}
-      />
-      <text x="50%" y="50%" textAnchor="middle" dominantBaseline="central"
-        style={{ fill: "var(--color-ink)", fontSize: 12, fontWeight: 600 }}>
-        {erledigt}/{gesamt}
-      </text>
-    </svg>
-  )
 }
 
 // ---- Habit-Tracker (Tagesansicht zum Abhaken) ---------------------------
@@ -106,7 +84,7 @@ function HabitTracker() {
               </button>
             )}
           </div>
-          <Ring erledigt={erledigt} gesamt={gesamt} />
+          <Ring value={erledigt} max={gesamt} label={`${erledigt}/${gesamt}`} />
         </div>
 
         {/* Habit-Liste */}
