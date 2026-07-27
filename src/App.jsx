@@ -3,6 +3,7 @@ import useStored, { setzeCloudSession } from "./lib/useStored"
 import useStil from "./lib/useStil"
 import { supabase, cloudAktiv } from "./lib/supabase"
 import { cx, icons } from "./components/ui"
+import ErrorBoundary from "./components/ErrorBoundary"
 import Login from "./components/Login"
 import Onboarding from "./components/Onboarding"
 import Dashboard from "./components/Dashboard"
@@ -139,19 +140,21 @@ export default function App() {
       <BottomBar seite={seite} onNavigate={navigiere} />
 
       <main className="md:pl-60">
-        <div
-          key={seite}
-          className="animate-page mx-auto max-w-5xl px-4 pb-28 pt-6 sm:px-6 sm:pt-10 md:pb-14"
-        >
-          {seite === "dashboard" && <Dashboard onNavigate={navigiere} />}
-          {seite === "ziel" && <ZielSeite onBack={zurueck} />}
-          {seite === "training" && (
-            <TrainingsplanSeite onBack={zurueck} onZiel={() => navigiere("ziel")} />
-          )}
-          {seite === "ernaehrung" && <ErnaehrungsplanSeite onBack={zurueck} />}
-          {seite === "kalender" && <KalenderSeite onBack={zurueck} />}
-          {seite === "einstellungen" && <Einstellungen session={session} />}
-        </div>
+        <ErrorBoundary key={seite}>
+          <div
+            key={seite}
+            className="animate-page mx-auto max-w-5xl px-4 pb-28 pt-6 sm:px-6 sm:pt-10 md:pb-14"
+          >
+            {seite === "dashboard" && <Dashboard onNavigate={navigiere} />}
+            {seite === "ziel" && <ZielSeite onBack={zurueck} />}
+            {seite === "training" && (
+              <TrainingsplanSeite onBack={zurueck} onZiel={() => navigiere("ziel")} />
+            )}
+            {seite === "ernaehrung" && <ErnaehrungsplanSeite onBack={zurueck} />}
+            {seite === "kalender" && <KalenderSeite onBack={zurueck} />}
+            {seite === "einstellungen" && <Einstellungen session={session} />}
+          </div>
+        </ErrorBoundary>
       </main>
     </div>
   )
