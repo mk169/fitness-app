@@ -6,7 +6,6 @@ import { SPLITS, standardTage, wendeSplitAn, planTag, normEintrag } from "../lib
 import { UEBUNGEN, KATEGORIEN, MUSKELGRUPPEN, uebungVon } from "../lib/uebungen"
 import { KONZEPTE, FASTEN_METHODEN, methodeVon, FARBEN } from "../lib/ernaehrung"
 import { FastenPhasen } from "./ErnaehrungsplanSeite"
-import StilWaehler from "./StilWaehler"
 import { Card, PageHeader, SectionTitle, Button, Pill, cx, inputCls } from "./ui"
 
 // Standard-Profil. Wird von Training und Ernährung gemeinsam genutzt und
@@ -52,7 +51,6 @@ const TAG_LABELS = [
 
 export default function ZielSeite() {
   const { profil, setProfil, plan } = useZiel()
-  const [, setOnboardingFertig] = useStored("onboardingFertig", false)
   const set = (feld) => (e) => {
     const v = e.target.value
     const zahl = ["alter", "groesse", "gewicht", "zielGewicht", "kfa", "zeitProEinheit"]
@@ -64,14 +62,6 @@ export default function ZielSeite() {
       <PageHeader
         title="Ziel & Anpassung"
         subtitle="Ziel, Trainingsplan und Ernährung – alles hier einstellbar, jederzeit änderbar."
-        right={
-          <button
-            onClick={() => setOnboardingFertig(false)}
-            className="rounded-lg border border-[color:var(--ov-10)] bg-surface-2 px-3 py-1.5 text-xs font-medium text-muted transition-colors hover:border-[color:var(--ov-25)] hover:text-ink"
-          >
-            Einrichtung neu starten
-          </button>
-        }
       />
 
       <div className="mt-6 grid gap-4 lg:grid-cols-2">
@@ -142,7 +132,6 @@ export default function ZielSeite() {
       <TrainingAnpassen profil={profil} setProfil={setProfil} />
       <ErnaehrungAnpassen />
       <FastenPhasen />
-      <StilWaehler variant="voll" />
     </div>
   )
 }
