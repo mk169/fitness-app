@@ -34,7 +34,7 @@ export default function ErnaehrungsplanSeite() {
 function MakroZiele({ plan }) {
   if (!plan) {
     return (
-      <div className="mt-6 rounded-2xl border border-dashed border-white/15 p-5 text-sm text-muted">
+      <div className="mt-6 rounded-2xl border border-dashed border-[color:var(--ov-15)] p-5 text-sm text-muted">
         Lege zuerst dein <span className="font-medium text-ink">Ziel</span> fest,
         dann erscheinen hier Kalorien- und Makro-Vorgaben.
       </div>
@@ -166,7 +166,7 @@ function FastenBereich() {
                     <input
                       type="number" min="0" max="23" value={f.start}
                       onChange={(e) => setFenster(i, "start", e.target.value)}
-                      className="mt-1 w-20 rounded-lg border border-white/10 bg-surface-2 px-3 py-2 text-sm text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/30"
+                      className="mt-1 w-20 rounded-lg border border-[color:var(--ov-10)] bg-surface-2 px-3 py-2 text-sm text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/30"
                     />
                   </label>
                   <label className={labelCls}>
@@ -174,7 +174,7 @@ function FastenBereich() {
                     <input
                       type="number" min="1" max="24" value={f.ende}
                       onChange={(e) => setFenster(i, "ende", e.target.value)}
-                      className="mt-1 w-20 rounded-lg border border-white/10 bg-surface-2 px-3 py-2 text-sm text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/30"
+                      className="mt-1 w-20 rounded-lg border border-[color:var(--ov-10)] bg-surface-2 px-3 py-2 text-sm text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/30"
                     />
                   </label>
                   <span className="pb-2 text-xs text-muted">Uhr</span>
@@ -199,7 +199,7 @@ function FastenBereich() {
         {/* Live-Fasten-Uhr */}
         <div className={cx(
           "rounded-2xl border-2 bg-surface p-5",
-          status?.imFenster ? "border-emerald-400/50 shadow-[0_0_30px_-10px_rgba(16,185,129,0.5)]" : "border-white/10"
+          status?.imFenster ? "border-emerald-400/50 shadow-[0_0_30px_-10px_rgba(16,185,129,0.5)]" : "border-[color:var(--ov-10)]"
         )}>
           <h3 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-faint">
             {status ? (status.imFenster ? "Essensfenster offen" : "Fastenphase") : "Fasten"}
@@ -259,7 +259,7 @@ export function FastenPhasen() {
   const statusChip = {
     aktiv: "bg-emerald-500/15 text-emerald-300",
     kommend: "bg-sky-500/15 text-sky-300",
-    beendet: "bg-white/10 text-faint",
+    beendet: "bg-[color:var(--ov-10)] text-faint",
   }
 
   return (
@@ -285,7 +285,7 @@ export function FastenPhasen() {
               "rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
               titel === v.titel
                 ? "border-violet-400/50 bg-violet-500/15 text-violet-300"
-                : "border-white/10 text-muted hover:border-white/25"
+                : "border-[color:var(--ov-10)] text-muted hover:border-[color:var(--ov-25)]"
             )}
           >
             {v.titel}
@@ -299,21 +299,21 @@ export function FastenPhasen() {
           <input
             value={titel} onChange={(e) => setTitel(e.target.value)}
             placeholder="z. B. Frühjahrs-Detox"
-            className="mt-1 rounded-lg border border-white/10 bg-surface-2 px-3 py-2 text-sm text-ink outline-none placeholder:text-faint focus:border-accent focus:ring-2 focus:ring-accent/30"
+            className="mt-1 rounded-lg border border-[color:var(--ov-10)] bg-surface-2 px-3 py-2 text-sm text-ink outline-none placeholder:text-faint focus:border-accent focus:ring-2 focus:ring-accent/30"
           />
         </label>
         <label className={labelCls}>
           Start
           <input
             type="date" value={start} onChange={(e) => setStart(e.target.value)}
-            className="mt-1 rounded-lg border border-white/10 bg-surface-2 px-3 py-2 text-sm text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/30"
+            className="mt-1 rounded-lg border border-[color:var(--ov-10)] bg-surface-2 px-3 py-2 text-sm text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/30"
           />
         </label>
         <label className={labelCls}>
           Dauer (Tage)
           <input
             type="number" min="1" max="14" value={tage} onChange={(e) => setTage(e.target.value)}
-            className="mt-1 w-24 rounded-lg border border-white/10 bg-surface-2 px-3 py-2 text-sm text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/30"
+            className="mt-1 w-24 rounded-lg border border-[color:var(--ov-10)] bg-surface-2 px-3 py-2 text-sm text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/30"
           />
         </label>
         <Button type="submit">Phase planen</Button>
@@ -321,7 +321,7 @@ export function FastenPhasen() {
 
       {phasen.length > 0 && (
         <Card className="mt-3 px-4 py-2">
-          <ul className="divide-y divide-white/[0.06]">
+          <ul className="divide-y divide-[color:var(--ov-06)]">
             {phasen.map((p) => {
               const s = phasenStatus(p, heute())
               return (
@@ -392,7 +392,7 @@ function MahlzeitenLog({ kalorienZiel }) {
       </div>
 
       {kalorienZiel > 0 && (
-        <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10">
+        <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[color:var(--ov-10)]">
           <div
             className={cx("h-full rounded-full", summe > kalorienZiel ? "bg-rose-400" : "bg-accent-gradient")}
             style={{ width: `${Math.min(100, (summe / kalorienZiel) * 100)}%` }}
@@ -403,15 +403,15 @@ function MahlzeitenLog({ kalorienZiel }) {
       <form onSubmit={add} className="mt-3 flex flex-wrap items-end gap-2">
         <input
           value={titel} onChange={(e) => setTitel(e.target.value)} placeholder="Mahlzeit…"
-          className="min-w-40 flex-1 rounded-lg border border-white/10 bg-surface-2 px-3 py-2 text-sm text-ink outline-none placeholder:text-faint focus:border-accent focus:ring-2 focus:ring-accent/30"
+          className="min-w-40 flex-1 rounded-lg border border-[color:var(--ov-10)] bg-surface-2 px-3 py-2 text-sm text-ink outline-none placeholder:text-faint focus:border-accent focus:ring-2 focus:ring-accent/30"
         />
         <input
           type="number" value={kcal} onChange={(e) => setKcal(e.target.value)} placeholder="kcal"
-          className="w-24 rounded-lg border border-white/10 bg-surface-2 px-3 py-2 text-sm text-ink outline-none placeholder:text-faint focus:border-accent focus:ring-2 focus:ring-accent/30"
+          className="w-24 rounded-lg border border-[color:var(--ov-10)] bg-surface-2 px-3 py-2 text-sm text-ink outline-none placeholder:text-faint focus:border-accent focus:ring-2 focus:ring-accent/30"
         />
         <input
           type="time" value={zeit} onChange={(e) => setZeit(e.target.value)}
-          className="rounded-lg border border-white/10 bg-surface-2 px-3 py-2 text-sm text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/30"
+          className="rounded-lg border border-[color:var(--ov-10)] bg-surface-2 px-3 py-2 text-sm text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/30"
         />
         <Button type="submit">Hinzufügen</Button>
       </form>
@@ -420,7 +420,7 @@ function MahlzeitenLog({ kalorienZiel }) {
         {heutige.length === 0 ? (
           <p className="py-4 text-center text-sm text-muted">Noch nichts erfasst.</p>
         ) : (
-          <ul className="divide-y divide-white/[0.06]">
+          <ul className="divide-y divide-[color:var(--ov-06)]">
             {heutige.map((m) => (
               <li key={m.id} className="group flex items-center gap-3 py-2">
                 <span className="w-12 text-xs text-faint">{m.zeit || "–"}</span>

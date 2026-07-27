@@ -8,10 +8,10 @@ export function cx(...teile) {
 
 // Geteilte Klassen-Strings ------------------------------------------------
 export const cardCls =
-  "rounded-2xl border border-white/[0.06] bg-surface shadow-[var(--shadow-card)]"
+  "rounded-2xl border border-[color:var(--ov-06)] bg-surface shadow-[var(--shadow-card)]"
 
 export const inputCls =
-  "w-full rounded-lg border border-white/10 bg-surface-2 px-3 py-2 text-sm text-ink outline-none transition-colors placeholder:text-faint focus:border-accent focus:ring-2 focus:ring-accent/30"
+  "w-full rounded-lg border border-[color:var(--ov-10)] bg-surface-2 px-3 py-2 text-sm text-ink outline-none transition-colors placeholder:text-faint focus:border-accent focus:ring-2 focus:ring-accent/30"
 
 export const labelCls = "flex flex-col gap-1 text-xs font-medium text-muted"
 
@@ -65,7 +65,7 @@ const buttonVarianten = {
   primary:
     "bg-accent-gradient text-white shadow-[var(--shadow-glow)] hover:brightness-110",
   subtle:
-    "border border-white/10 bg-surface-2 text-ink hover:border-white/25",
+    "border border-[color:var(--ov-10)] bg-surface-2 text-ink hover:border-[color:var(--ov-25)]",
   ghost: "text-muted hover:text-ink",
 }
 
@@ -90,7 +90,7 @@ export function Pill({ active, className, ...rest }) {
         "rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors",
         active
           ? "border-transparent bg-accent-gradient text-white shadow-[var(--shadow-glow)]"
-          : "border-white/10 bg-surface-2 text-muted hover:border-white/25 hover:text-ink",
+          : "border-[color:var(--ov-10)] bg-surface-2 text-muted hover:border-[color:var(--ov-25)] hover:text-ink",
         className
       )}
       {...rest}

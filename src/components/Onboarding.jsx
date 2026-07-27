@@ -62,7 +62,7 @@ function WahlKarte({ aktiv, onClick, titel, badge, punkt, children }) {
         "group relative overflow-hidden rounded-2xl border bg-surface p-4 text-left transition-all duration-200",
         aktiv
           ? "border-accent/60 shadow-[var(--shadow-glow)]"
-          : "border-white/[0.06] hover:border-white/20 hover:bg-surface-2"
+          : "border-[color:var(--ov-06)] hover:border-[color:var(--ov-20)] hover:bg-surface-2"
       )}
     >
       <div className="flex items-center justify-between gap-2">
@@ -71,7 +71,7 @@ function WahlKarte({ aktiv, onClick, titel, badge, punkt, children }) {
           {titel}
         </span>
         {badge && (
-          <span className="shrink-0 rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-medium text-muted">
+          <span className="shrink-0 rounded-full bg-[color:var(--ov-10)] px-2 py-0.5 text-[10px] font-medium text-muted">
             {badge}
           </span>
         )}
@@ -204,7 +204,7 @@ export default function Onboarding({ onFertig }) {
           )}
         </div>
 
-        <div className="mt-6 h-1.5 overflow-hidden rounded-full bg-white/[0.06]">
+        <div className="mt-6 h-1.5 overflow-hidden rounded-full bg-[color:var(--ov-06)]">
           <div
             className="h-full rounded-full bg-accent-gradient transition-[width] duration-500 ease-out"
             style={{ width: `${Math.max(6, fortschritt)}%` }}
@@ -292,7 +292,7 @@ function Willkommen() {
         ].map((z) => (
           <div
             key={z.t}
-            className="flex items-center gap-3 rounded-2xl border border-white/[0.06] bg-surface px-4 py-3"
+            className="flex items-center gap-3 rounded-2xl border border-[color:var(--ov-06)] bg-surface px-4 py-3"
           >
             <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-surface-2 text-lg">
               {z.icon}
@@ -425,7 +425,7 @@ function TrainingSchritt({ entwurf, split, modusVon, splitWaehlen, toggleTag, to
                 "min-w-11 rounded-xl border px-3 py-2 text-sm font-medium transition-colors",
                 entwurf.tageWahl.includes(t.key)
                   ? "border-accent/60 bg-accent/15 text-accent-soft"
-                  : "border-white/10 text-faint hover:border-white/25"
+                  : "border-[color:var(--ov-10)] text-faint hover:border-[color:var(--ov-25)]"
               )}
             >
               {t.label}
@@ -452,7 +452,7 @@ function TrainingSchritt({ entwurf, split, modusVon, splitWaehlen, toggleTag, to
                     "rounded-xl border px-3 py-1.5 text-xs font-medium transition-colors",
                     heim
                       ? "border-emerald-400/50 bg-emerald-500/15 text-emerald-300"
-                      : "border-white/10 bg-surface-2 text-muted"
+                      : "border-[color:var(--ov-10)] bg-surface-2 text-muted"
                   )}
                 >
                   {t.label} · {heim ? "Zuhause" : "Gym"}
@@ -504,7 +504,7 @@ function ErnaehrungSchritt({ entwurf, set }) {
               "rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors",
               entwurf.fastenMethode === m.id
                 ? "border-transparent bg-accent-gradient text-white shadow-[var(--shadow-glow)]"
-                : "border-white/10 bg-surface-2 text-muted hover:border-white/25 hover:text-ink"
+                : "border-[color:var(--ov-10)] bg-surface-2 text-muted hover:border-[color:var(--ov-25)] hover:text-ink"
             )}
           >
             {m.name}
@@ -575,7 +575,7 @@ function FertigSchritt({ entwurf, plan }) {
 
 function ZusammenKachel({ label, wert, sub }) {
   return (
-    <div className="rounded-2xl border border-white/[0.06] bg-surface p-4">
+    <div className="rounded-2xl border border-[color:var(--ov-06)] bg-surface p-4">
       <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-faint">{label}</p>
       <p className="mt-1 text-sm font-semibold text-ink">{wert ?? "—"}</p>
       {sub && <p className="text-xs text-muted">{sub}</p>}

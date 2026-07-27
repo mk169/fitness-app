@@ -149,7 +149,7 @@ function HeuteBlock({ profil, plan, onNavigate }) {
             Heute steht nichts an – Kalender öffnen, um zu planen.
           </p>
         ) : (
-          <ul className="divide-y divide-white/[0.06]">
+          <ul className="divide-y divide-[color:var(--ov-06)]">
             {zeilen.map((z, i) => {
               const typ = EINTRAG_TYPEN[z.typ]
               const Zeile = z.onClick ? "button" : "div"
@@ -181,7 +181,7 @@ function HeuteBlock({ profil, plan, onNavigate }) {
         )}
 
         {/* Tages-Check: eingehalten? */}
-        <div className="flex flex-wrap gap-5 border-t border-white/[0.06] py-3">
+        <div className="flex flex-wrap gap-5 border-t border-[color:var(--ov-06)] py-3">
           <label className="flex cursor-pointer items-center gap-2 text-sm text-muted">
             <input
               type="checkbox"
@@ -211,7 +211,7 @@ function ZielBanner({ plan, onOeffnen }) {
     return (
       <button
         onClick={onOeffnen}
-        className="mt-10 flex w-full items-center justify-between rounded-2xl border border-dashed border-white/15 px-5 py-4 text-left transition-colors hover:border-accent/50"
+        className="mt-10 flex w-full items-center justify-between rounded-2xl border border-dashed border-[color:var(--ov-15)] px-5 py-4 text-left transition-colors hover:border-accent/50"
       >
         <span>
           <span className="block text-sm font-semibold text-ink">Ziel festlegen</span>
