@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react"
 import useStored, { setzeCloudSession } from "./lib/useStored"
+import useStil from "./lib/useStil"
 import { supabase, cloudAktiv } from "./lib/supabase"
 import { cx, icons } from "./components/ui"
+import StilWaehler from "./components/StilWaehler"
 import Login from "./components/Login"
 import Onboarding from "./components/Onboarding"
 import Dashboard from "./components/Dashboard"
@@ -32,7 +34,7 @@ function Wortmarke() {
 
 function Sidebar({ seite, onNavigate, session }) {
   return (
-    <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col border-r border-white/[0.06] bg-bg-soft px-4 py-6 md:flex">
+    <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col border-r border-[color:var(--ov-06)] bg-bg-soft px-4 py-6 md:flex">
       <button onClick={() => onNavigate("dashboard")} className="px-2">
         <Wortmarke />
       </button>
@@ -48,7 +50,7 @@ function Sidebar({ seite, onNavigate, session }) {
                 "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
                 aktiv
                   ? "bg-accent/15 text-accent-soft"
-                  : "text-muted hover:bg-white/[0.04] hover:text-ink"
+                  : "text-muted hover:bg-[color:var(--ov-04)] hover:text-ink"
               )}
             >
               {aktiv && (
@@ -61,25 +63,29 @@ function Sidebar({ seite, onNavigate, session }) {
         })}
       </nav>
 
-      {cloudAktiv && session && (
-        <div className="border-t border-white/[0.06] pt-4">
-          <p className="truncate px-3 text-xs text-faint">{session.user?.email}</p>
-          <button
-            onClick={() => supabase.auth.signOut()}
-            className="mt-2 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted transition-colors hover:bg-white/[0.04] hover:text-ink"
-          >
-            {icons.logout("h-5 w-5 shrink-0")}
-            Abmelden
-          </button>
-        </div>
-      )}
+      <div className="mt-auto border-t border-[color:var(--ov-06)] pt-4">
+        <StilWaehler variant="kompakt" />
+
+        {cloudAktiv && session && (
+          <div className="mt-4 border-t border-[color:var(--ov-06)] pt-4">
+            <p className="truncate px-3 text-xs text-faint">{session.user?.email}</p>
+            <button
+              onClick={() => supabase.auth.signOut()}
+              className="mt-2 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted transition-colors hover:bg-[color:var(--ov-04)] hover:text-ink"
+            >
+              {icons.logout("h-5 w-5 shrink-0")}
+              Abmelden
+            </button>
+          </div>
+        )}
+      </div>
     </aside>
   )
 }
 
 function BottomBar({ seite, onNavigate }) {
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-white/[0.06] bg-bg-soft/95 backdrop-blur-md md:hidden">
+    <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-[color:var(--ov-06)] bg-bg-soft/95 backdrop-blur-md md:hidden">
       <div className="mx-auto flex max-w-md items-stretch justify-around px-1 pb-[env(safe-area-inset-bottom)]">
         {NAV.map((n) => {
           const aktiv = seite === n.key
@@ -109,6 +115,8 @@ export default function App() {
   const [authBereit, setAuthBereit] = useState(!cloudAktiv)
   // Erst-Einrichtung: bis abgeschlossen wird der Onboarding-Assistent gezeigt.
   const [onboardingFertig, setOnboardingFertig] = useStored("onboardingFertig", false)
+  // Gewählten Stil laden und auf das Wurzelelement anwenden.
+  useStil()
 
   // Auth-Status verfolgen (nur wenn Supabase konfiguriert ist).
   useEffect(() => {

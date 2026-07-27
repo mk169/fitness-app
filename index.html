@@ -8,6 +8,26 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="Mogged" />
     <title>Mogged</title>
+    <script>
+      // Gewählten Stil vor dem ersten Paint anwenden (verhindert Aufblitzen).
+      // Nur Hintergrund & color-scheme – den Rest übernimmt React beim Mount.
+      (function () {
+        try {
+          var id = JSON.parse(localStorage.getItem("stil") || '"indigo"')
+          var m = {
+            indigo: ["#0a0b10", "dark"], obsidian: ["#000000", "dark"],
+            schiefer: ["#0b1017", "dark"], smaragd: ["#07110d", "dark"],
+            espresso: ["#120e0a", "dark"], bordeaux: ["#120a0f", "dark"],
+            tageslicht: ["#f5f6fa", "light"],
+          }
+          var t = m[id] || m.indigo
+          var r = document.documentElement
+          r.style.setProperty("--color-bg", t[0])
+          r.style.colorScheme = t[1]
+          r.style.backgroundColor = t[0]
+        } catch (e) {}
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>

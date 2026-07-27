@@ -6,6 +6,7 @@ import { SPLITS, standardTage, wendeSplitAn, planTag, normEintrag } from "../lib
 import { UEBUNGEN, KATEGORIEN, MUSKELGRUPPEN, uebungVon } from "../lib/uebungen"
 import { KONZEPTE, FASTEN_METHODEN, methodeVon, FARBEN } from "../lib/ernaehrung"
 import { FastenPhasen } from "./ErnaehrungsplanSeite"
+import StilWaehler from "./StilWaehler"
 import { Card, PageHeader, SectionTitle, Button, Pill, cx, inputCls } from "./ui"
 
 // Standard-Profil. Wird von Training und Ernährung gemeinsam genutzt und
@@ -66,7 +67,7 @@ export default function ZielSeite() {
         right={
           <button
             onClick={() => setOnboardingFertig(false)}
-            className="rounded-lg border border-white/10 bg-surface-2 px-3 py-1.5 text-xs font-medium text-muted transition-colors hover:border-white/25 hover:text-ink"
+            className="rounded-lg border border-[color:var(--ov-10)] bg-surface-2 px-3 py-1.5 text-xs font-medium text-muted transition-colors hover:border-[color:var(--ov-25)] hover:text-ink"
           >
             Einrichtung neu starten
           </button>
@@ -141,6 +142,7 @@ export default function ZielSeite() {
       <TrainingAnpassen profil={profil} setProfil={setProfil} />
       <ErnaehrungAnpassen />
       <FastenPhasen />
+      <StilWaehler variant="voll" />
     </div>
   )
 }
@@ -202,12 +204,12 @@ function TrainingAnpassen({ profil, setProfil }) {
               onClick={() => splitWaehlen(key)}
               className={cx(
                 "rounded-2xl border bg-surface p-4 text-left transition-colors",
-                aktiv ? "border-accent/60 shadow-[var(--shadow-glow)]" : "border-white/[0.06] hover:border-white/25"
+                aktiv ? "border-accent/60 shadow-[var(--shadow-glow)]" : "border-[color:var(--ov-06)] hover:border-[color:var(--ov-25)]"
               )}
             >
               <div className="flex items-center justify-between">
                 <span className="font-semibold text-ink">{s.name}</span>
-                <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-medium text-muted">
+                <span className="rounded-full bg-[color:var(--ov-10)] px-2 py-0.5 text-[10px] font-medium text-muted">
                   {s.empfohleneTage} Tage · {s.kurz}
                 </span>
               </div>
@@ -228,7 +230,7 @@ function TrainingAnpassen({ profil, setProfil }) {
               "rounded-lg border px-3 py-1.5 text-sm transition-colors",
               tageWahl.includes(t.key)
                 ? "border-accent/60 bg-accent/15 font-medium text-accent-soft"
-                : "border-white/10 text-faint hover:border-white/25"
+                : "border-[color:var(--ov-10)] text-faint hover:border-[color:var(--ov-25)]"
             )}
           >
             {t.label}
@@ -254,7 +256,7 @@ function TrainingAnpassen({ profil, setProfil }) {
                   "rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors",
                   heim
                     ? "border-emerald-400/50 bg-emerald-500/15 text-emerald-300"
-                    : "border-white/10 bg-surface-2 text-muted"
+                    : "border-[color:var(--ov-10)] bg-surface-2 text-muted"
                 )}
               >
                 {t.label} · {heim ? "Cali" : "Gym"}
@@ -326,7 +328,7 @@ function FeinschliffEditor({ tageWahl }) {
                 "rounded-lg border px-2.5 py-1.5 text-sm transition-colors",
                 tag === t.key
                   ? "border-transparent bg-accent-gradient text-white"
-                  : "border-white/10 text-muted hover:border-white/25"
+                  : "border-[color:var(--ov-10)] text-muted hover:border-[color:var(--ov-25)]"
               )}
             >
               {t.label}
@@ -343,13 +345,13 @@ function FeinschliffEditor({ tageWahl }) {
       {eintraege.length === 0 ? (
         <p className="mt-3 text-sm text-muted">Ruhetag – keine Übungen.</p>
       ) : (
-        <ul className="mt-3 divide-y divide-white/[0.06]">
+        <ul className="mt-3 divide-y divide-[color:var(--ov-06)]">
           {eintraege.map((e) => {
             const u = uebungVon(e.id)
             if (!u) return null
             const cali = u.geraet === "Körpergewicht"
             const zielInput =
-              "w-14 rounded-md border border-white/10 bg-surface-2 px-1.5 py-1 text-center text-sm text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/30"
+              "w-14 rounded-md border border-[color:var(--ov-10)] bg-surface-2 px-1.5 py-1 text-center text-sm text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/30"
             return (
               <li key={e.id} className="flex flex-wrap items-center gap-2.5 py-2">
                 <button
@@ -387,7 +389,7 @@ function FeinschliffEditor({ tageWahl }) {
                 <span
                   className={cx(
                     "rounded px-1.5 py-0.5 text-[10px] font-medium",
-                    cali ? "bg-emerald-500/15 text-emerald-300" : "bg-white/10 text-muted"
+                    cali ? "bg-emerald-500/15 text-emerald-300" : "bg-[color:var(--ov-10)] text-muted"
                   )}
                 >
                   {cali ? "Cali" : u.geraet}
@@ -411,7 +413,7 @@ function FeinschliffEditor({ tageWahl }) {
       <select
         value=""
         onChange={(e) => hinzufuegen(e.target.value)}
-        className="mt-3 rounded-lg border border-white/10 bg-surface-2 px-2.5 py-2 text-sm text-muted outline-none focus:border-accent focus:ring-2 focus:ring-accent/30"
+        className="mt-3 rounded-lg border border-[color:var(--ov-10)] bg-surface-2 px-2.5 py-2 text-sm text-muted outline-none focus:border-accent focus:ring-2 focus:ring-accent/30"
       >
         <option value="">+ Übung hinzufügen…</option>
         {KATEGORIEN.map((kat) => (
@@ -475,7 +477,7 @@ function ErnaehrungAnpassen() {
 function Ergebnis({ plan }) {
   if (!plan) {
     return (
-      <div className="rounded-2xl border border-dashed border-white/15 p-5 text-sm text-muted">
+      <div className="rounded-2xl border border-dashed border-[color:var(--ov-15)] p-5 text-sm text-muted">
         Fülle deine Körperdaten aus, um deinen Plan zu berechnen.
       </div>
     )

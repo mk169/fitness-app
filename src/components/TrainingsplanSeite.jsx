@@ -115,7 +115,7 @@ function HeuteKarte({ eintraege, einheitName, onStart }) {
             if (!u) return null
             const check = !!tages.uebungen?.[e.id]
             return (
-              <li key={e.id} className="flex items-center gap-2.5 border-b border-white/[0.06] py-1.5">
+              <li key={e.id} className="flex items-center gap-2.5 border-b border-[color:var(--ov-06)] py-1.5">
                 <input
                   type="checkbox"
                   checked={check}
@@ -153,7 +153,7 @@ function Wochenplan({ wochenplan, splitWahl, tageWahl, tagKey }) {
               key={t.key}
               className={cx(
                 "rounded-xl border bg-surface p-3.5",
-                istHeute ? "border-accent/60" : "border-white/[0.06]"
+                istHeute ? "border-accent/60" : "border-[color:var(--ov-06)]"
               )}
             >
               <div className="flex items-center justify-between">
@@ -304,7 +304,7 @@ function SessionAnsicht({ eintraege, profil, einheitName, onEnde }) {
             <input
               type="number" min="10" step="5" value={minuten}
               onChange={(e) => setMinuten(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-white/10 bg-surface-2 px-3 py-3 text-center text-2xl font-bold tabular-nums text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/30"
+              className="mt-1 w-full rounded-lg border border-[color:var(--ov-10)] bg-surface-2 px-3 py-3 text-center text-2xl font-bold tabular-nums text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/30"
             />
           </label>
           <Button onClick={starten} className="mt-4 w-full py-3">
@@ -353,7 +353,7 @@ function SessionAnsicht({ eintraege, profil, einheitName, onEnde }) {
           <Button onClick={onEnde}>Session beenden</Button>
         </div>
       </div>
-      <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/10">
+      <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[color:var(--ov-10)]">
         <div className="h-full rounded-full bg-accent-gradient transition-all" style={{ width: `${fortschritt * 100}%` }} />
       </div>
 
@@ -373,7 +373,7 @@ function SessionAnsicht({ eintraege, profil, einheitName, onEnde }) {
                     onClick={() => waehleUebung(e.id)}
                     className={cx(
                       "flex w-full items-center gap-3 rounded-xl border px-3 py-2.5 text-left transition-colors",
-                      istAktiv ? "border-accent/60 bg-accent/10" : "border-white/[0.06] bg-surface hover:border-white/25"
+                      istAktiv ? "border-accent/60 bg-accent/10" : "border-[color:var(--ov-06)] bg-surface hover:border-[color:var(--ov-25)]"
                     )}
                   >
                     <input
@@ -392,7 +392,7 @@ function SessionAnsicht({ eintraege, profil, einheitName, onEnde }) {
                     <span
                       className={cx(
                         "rounded-full px-2 py-0.5 text-[10px] font-medium tabular-nums",
-                        saetze >= e.saetze ? "bg-emerald-500/15 text-emerald-300" : "bg-white/10 text-muted"
+                        saetze >= e.saetze ? "bg-emerald-500/15 text-emerald-300" : "bg-[color:var(--ov-10)] text-muted"
                       )}
                     >
                       {saetze}/{e.saetze} Sätze
@@ -428,7 +428,7 @@ function SessionAnsicht({ eintraege, profil, einheitName, onEnde }) {
                     type="number" min="0" step="0.5" value={gewicht}
                     onChange={(e) => setGewicht(e.target.value)}
                     placeholder={uebung.geraet === "Körpergewicht" ? "0 = Körper" : ""}
-                    className="mt-1 w-28 rounded-lg border border-white/10 bg-surface-2 px-3 py-2 text-sm text-ink outline-none placeholder:text-faint focus:border-accent focus:ring-2 focus:ring-accent/30"
+                    className="mt-1 w-28 rounded-lg border border-[color:var(--ov-10)] bg-surface-2 px-3 py-2 text-sm text-ink outline-none placeholder:text-faint focus:border-accent focus:ring-2 focus:ring-accent/30"
                   />
                 </label>
                 <label className={labelCls}>
@@ -436,7 +436,7 @@ function SessionAnsicht({ eintraege, profil, einheitName, onEnde }) {
                   <input
                     type="number" min="1" value={wdh}
                     onChange={(e) => setWdh(e.target.value)}
-                    className="mt-1 w-20 rounded-lg border border-white/10 bg-surface-2 px-3 py-2 text-sm text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/30"
+                    className="mt-1 w-20 rounded-lg border border-[color:var(--ov-10)] bg-surface-2 px-3 py-2 text-sm text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/30"
                   />
                 </label>
                 <Button type="submit">+ Satz</Button>
@@ -479,7 +479,7 @@ function SessionAnsicht({ eintraege, profil, einheitName, onEnde }) {
                 </span>
               ))}
               {(uebung?.sekundaer ?? []).map((m) => (
-                <span key={m} className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] text-muted">
+                <span key={m} className="rounded-full bg-[color:var(--ov-10)] px-2 py-0.5 text-[10px] text-muted">
                   {MUSKELGRUPPEN[m]?.name}
                 </span>
               ))}
@@ -523,7 +523,7 @@ function ProgressStatistik({ wochenplan }) {
             <select
               value={aktivId ?? ""}
               onChange={(e) => setGewaehlt(e.target.value)}
-              className="rounded-lg border border-white/10 bg-surface-2 px-2.5 py-1.5 text-sm text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/30"
+              className="rounded-lg border border-[color:var(--ov-10)] bg-surface-2 px-2.5 py-1.5 text-sm text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/30"
             >
               {auswahlIds.map((id) => {
                 const u = uebungVon(id)

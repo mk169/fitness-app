@@ -79,13 +79,13 @@ export function KalenderPanel() {
   return (
     <Card className="p-5">
       {formOffen && (
-        <form onSubmit={addTermin} className="mb-4 rounded-xl border border-white/[0.06] bg-surface-2 p-4">
+        <form onSubmit={addTermin} className="mb-4 rounded-xl border border-[color:var(--ov-06)] bg-surface-2 p-4">
           <input
             value={formTitel}
             onChange={(e) => setFormTitel(e.target.value)}
             placeholder="Was steht an? (z. B. Push-Training, Refeed …)"
             autoFocus
-            className="w-full rounded-lg border border-white/10 bg-surface px-4 py-3 text-lg font-medium text-ink outline-none transition-colors placeholder:text-faint focus:border-accent focus:ring-2 focus:ring-accent/30"
+            className="w-full rounded-lg border border-[color:var(--ov-10)] bg-surface px-4 py-3 text-lg font-medium text-ink outline-none transition-colors placeholder:text-faint focus:border-accent focus:ring-2 focus:ring-accent/30"
           />
           <div className="mt-3 flex flex-wrap items-end gap-2">
             <label className={labelCls}>

@@ -12,7 +12,7 @@ export const EINTRAG_TYPEN = {
   training: { chip: "bg-indigo-500/20 text-indigo-300", punkt: "bg-indigo-400", name: "Training" },
   mahlzeit: { chip: "bg-amber-500/20 text-amber-300", punkt: "bg-amber-400", name: "Ernährung" },
   fasten: { chip: "bg-violet-500/20 text-violet-300", punkt: "bg-violet-400", name: "Fasten" },
-  termin: { chip: "bg-white/10 text-muted", punkt: "bg-slate-400", name: "Termin" },
+  termin: { chip: "bg-[color:var(--ov-10)] text-muted", punkt: "bg-slate-400", name: "Termin" },
 }
 
 export function schluessel(d) {
@@ -59,7 +59,7 @@ export default function Kalender({ eintraegeAm, legende = [], onNeu }) {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm font-semibold text-ink">{titel}</p>
         <div className="flex flex-wrap items-center gap-2">
-          <div className="flex rounded-lg border border-white/10 bg-surface-2 p-0.5 text-xs">
+          <div className="flex rounded-lg border border-[color:var(--ov-10)] bg-surface-2 p-0.5 text-xs">
             {[
               { key: "tag", label: "Tag" },
               { key: "woche", label: "Woche" },
@@ -81,19 +81,19 @@ export default function Kalender({ eintraegeAm, legende = [], onNeu }) {
           </div>
           <button
             onClick={() => setCursor(heuteKey)}
-            className="rounded-lg border border-white/10 bg-surface-2 px-2.5 py-1 text-xs text-muted transition-colors hover:text-ink"
+            className="rounded-lg border border-[color:var(--ov-10)] bg-surface-2 px-2.5 py-1 text-xs text-muted transition-colors hover:text-ink"
           >
             Heute
           </button>
           <button
             onClick={() => blaettern(-1)}
-            className="rounded-lg border border-white/10 bg-surface-2 px-2 py-1 text-xs text-muted transition-colors hover:text-ink"
+            className="rounded-lg border border-[color:var(--ov-10)] bg-surface-2 px-2 py-1 text-xs text-muted transition-colors hover:text-ink"
           >
             ‹
           </button>
           <button
             onClick={() => blaettern(1)}
-            className="rounded-lg border border-white/10 bg-surface-2 px-2 py-1 text-xs text-muted transition-colors hover:text-ink"
+            className="rounded-lg border border-[color:var(--ov-10)] bg-surface-2 px-2 py-1 text-xs text-muted transition-colors hover:text-ink"
           >
             ›
           </button>
@@ -165,7 +165,7 @@ function MonatsAnsicht({ cursorDate, heuteKey, eintraegeAm, onTagKlick }) {
           </div>
         ))}
       </div>
-      <div className="grid grid-cols-7 gap-px overflow-hidden rounded-xl border border-white/[0.06] bg-white/[0.06]">
+      <div className="grid grid-cols-7 gap-px overflow-hidden rounded-xl border border-[color:var(--ov-06)] bg-[color:var(--ov-06)]">
         {Array.from({ length: startOffset }).map((_, i) => (
           <div key={`leer-${i}`} className="min-h-16 bg-bg-soft" />
         ))}
@@ -235,8 +235,8 @@ function WochenAnsicht({ cursorDate, heuteKey, eintraegeAm, onTagKlick }) {
             key={key}
             onClick={() => onTagKlick(key)}
             className={cx(
-              "flex min-h-28 flex-col gap-1 rounded-xl border bg-surface p-2 text-left transition-colors hover:border-white/25",
-              istHeute ? "border-accent/60" : "border-white/[0.06]"
+              "flex min-h-28 flex-col gap-1 rounded-xl border bg-surface p-2 text-left transition-colors hover:border-[color:var(--ov-25)]",
+              istHeute ? "border-accent/60" : "border-[color:var(--ov-06)]"
             )}
           >
             <span
@@ -278,7 +278,7 @@ function TagesAnsicht({ cursor, eintraegeAm, onNeu }) {
           {ohneZeit.map((e, i) => (
             <li
               key={i}
-              className="group flex items-center gap-3 rounded-xl border border-white/[0.06] bg-surface px-3 py-2"
+              className="group flex items-center gap-3 rounded-xl border border-[color:var(--ov-06)] bg-surface px-3 py-2"
             >
               <span className={cx("rounded px-2 py-0.5 text-xs", EINTRAG_TYPEN[e.typ].chip)}>
                 {EINTRAG_TYPEN[e.typ].name}
@@ -299,13 +299,13 @@ function TagesAnsicht({ cursor, eintraegeAm, onNeu }) {
       )}
 
       <div
-        className="relative overflow-hidden rounded-xl border border-white/[0.06] bg-surface"
+        className="relative overflow-hidden rounded-xl border border-[color:var(--ov-06)] bg-surface"
         style={{ height: (TAG_ENDE - TAG_START) * PX_PRO_STUNDE }}
       >
         {Array.from({ length: TAG_ENDE - TAG_START }).map((_, i) => (
           <div
             key={i}
-            className="absolute left-0 right-0 border-t border-white/[0.05]"
+            className="absolute left-0 right-0 border-t border-[color:var(--ov-05)]"
             style={{ top: i * PX_PRO_STUNDE }}
           >
             <span className="absolute left-2 top-0.5 text-[10px] text-faint">
@@ -324,7 +324,7 @@ function TagesAnsicht({ cursor, eintraegeAm, onNeu }) {
             <div
               key={i}
               className={cx(
-                "group absolute left-14 right-2 overflow-hidden rounded-md border border-white/10 px-2 py-1 text-xs",
+                "group absolute left-14 right-2 overflow-hidden rounded-md border border-[color:var(--ov-10)] px-2 py-1 text-xs",
                 EINTRAG_TYPEN[e.typ].chip
               )}
               style={{ top, height: hoehe }}

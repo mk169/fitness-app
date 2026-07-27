@@ -185,7 +185,7 @@ export function aktivePhase(phasen, datumKey) {
 }
 
 export const FARBEN = {
-  gray: { chip: "bg-white/10 text-muted", rand: "border-white/20", punkt: "bg-slate-400" },
+  gray: { chip: "bg-[color:var(--ov-10)] text-muted", rand: "border-[color:var(--ov-20)]", punkt: "bg-slate-400" },
   amber: { chip: "bg-amber-500/15 text-amber-300", rand: "border-amber-400/50", punkt: "bg-amber-400" },
   sky: { chip: "bg-sky-500/15 text-sky-300", rand: "border-sky-400/50", punkt: "bg-sky-400" },
   rose: { chip: "bg-rose-500/15 text-rose-300", rand: "border-rose-400/50", punkt: "bg-rose-400" },
