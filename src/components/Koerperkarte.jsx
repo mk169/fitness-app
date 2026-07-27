@@ -113,16 +113,20 @@ function Silhouette() {
   )
 }
 
-function Muskel({ form, aktiv, onMuskel }) {
+function Muskel({ form, aktiv, heat, onMuskel }) {
+  // Heatmap-Modus: heat (0..1) steuert die Deckkraft der Akzentfarbe.
+  const heatMode = heat != null
+  const stark = heatMode ? heat > 0 : aktiv
   const stil = {
     style: {
-      fill: aktiv ? "var(--kk-akzent)" : "var(--color-hair)",
-      stroke: aktiv ? "var(--kk-akzent)" : "transparent",
+      fill: stark ? "var(--kk-akzent)" : "var(--color-hair)",
+      fillOpacity: heatMode && stark ? 0.3 + 0.7 * heat : undefined,
+      stroke: stark && !heatMode ? "var(--kk-akzent)" : "transparent",
       strokeWidth: 1,
-      transition: "fill .18s ease, stroke .18s ease",
+      transition: "fill .18s ease, fill-opacity .18s ease, stroke .18s ease",
       cursor: onMuskel ? "pointer" : "default",
     },
-    filter: aktiv ? "url(#kkTiefe)" : undefined,
+    filter: aktiv && !heatMode ? "url(#kkTiefe)" : undefined,
     onClick: onMuskel ? () => onMuskel(form.key) : undefined,
   }
   const glanz = { fill: "url(#kkGlanz)", pointerEvents: "none" }
@@ -170,18 +174,28 @@ function Muskel({ form, aktiv, onMuskel }) {
   )
 }
 
-function Figur({ achse, formen, aktivSet, onMuskel }) {
+function Figur({ achse, formen, aktivSet, intensitaet, onMuskel }) {
   return (
     <g transform={`translate(${achse} 0)`}>
       <Silhouette />
-      {formen.map((f, i) => (
-        <Muskel key={`${f.key}-${i}`} form={f} aktiv={aktivSet.has(f.key)} onMuskel={onMuskel} />
-      ))}
+      {formen.map((f, i) => {
+        const heat = intensitaet ? (intensitaet[f.key] ?? 0) : null
+        return (
+          <Muskel
+            key={`${f.key}-${i}`}
+            form={f}
+            aktiv={heat != null ? heat > 0 : aktivSet.has(f.key)}
+            heat={heat}
+            onMuskel={onMuskel}
+          />
+        )
+      })}
     </g>
   )
 }
 
-export default function Koerperkarte({ aktiv, onMuskel, farbe, labels = true }) {
+// `intensitaet` (Map muskel→0..1) aktiviert den Heatmap-Modus; sonst binär via `aktiv`.
+export default function Koerperkarte({ aktiv, onMuskel, farbe, labels = true, intensitaet }) {
   const aktivSet = aktiv instanceof Set ? aktiv : new Set(aktiv ?? [])
 
   return (
@@ -210,8 +224,8 @@ export default function Koerperkarte({ aktiv, onMuskel, farbe, labels = true }) 
         </filter>
       </defs>
 
-      <Figur achse={ACHSE_V} formen={VORNE} aktivSet={aktivSet} onMuskel={onMuskel} />
-      <Figur achse={ACHSE_H} formen={HINTEN} aktivSet={aktivSet} onMuskel={onMuskel} />
+      <Figur achse={ACHSE_V} formen={VORNE} aktivSet={aktivSet} intensitaet={intensitaet} onMuskel={onMuskel} />
+      <Figur achse={ACHSE_H} formen={HINTEN} aktivSet={aktivSet} intensitaet={intensitaet} onMuskel={onMuskel} />
 
       {labels && (
         <g fill="var(--color-muted)" style={{ fontSize: 11 }} textAnchor="middle">

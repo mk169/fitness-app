@@ -4,6 +4,10 @@ import { heute } from "../lib/datum"
 import { MUSKELGRUPPEN, uebungVon, muskelnVon } from "../lib/uebungen"
 import { SPLITS, WOCHEN_KEYS, standardTage, tagesName, planTag, normEintrag } from "../lib/splits"
 import { e1rm, verlaufVon, overloadVorschlag } from "../lib/training"
+import {
+  wochenVolumen, intensitaet, bewertung, persoenlicheRekorde, konsistenz,
+  tonnageVerlauf, VOLUMEN_MIN, VOLUMEN_OPT,
+} from "../lib/analytik"
 import { useZiel } from "./ZielSeite"
 import Koerperkarte from "./Koerperkarte"
 import { Card, PageHeader, SectionTitle, Button, cx, labelCls } from "./ui"
@@ -71,7 +75,160 @@ export default function TrainingsplanSeite({ onZiel }) {
 
       <Wochenplan wochenplan={wochenplan} splitWahl={splitWahl} tageWahl={tageWahl} tagKey={tagKey} />
 
+      <AnalyseSektion />
+
       <ProgressStatistik wochenplan={wochenplan} />
+    </div>
+  )
+}
+
+// ---- Analyse: Muskel-Volumen-Heatmap, Rekorde, Konsistenz, Tonnage ----
+const BEWERTUNG_STIL = {
+  wenig: { chip: "bg-amber-500/15 text-amber-300", label: "zu wenig" },
+  optimal: { chip: "bg-emerald-500/15 text-emerald-300", label: "optimal" },
+  viel: { chip: "bg-rose-500/15 text-rose-300", label: "viel" },
+}
+
+function AnalyseSektion() {
+  const [log] = useStored("trainingLog", [])
+  const [wochen, setWochen] = useState(1)
+  const heuteKey = heute()
+
+  const vol = wochenVolumen(log, heuteKey, wochen)
+  const intens = intensitaet(
+    // Bei mehreren Wochen auf Wochenschnitt normieren, damit die Skala passt.
+    Object.fromEntries(Object.entries(vol).map(([k, v]) => [k, v / wochen]))
+  )
+  const prs = persoenlicheRekorde(log).slice(0, 6)
+  const kons = konsistenz(log, heuteKey)
+  const tonnage = tonnageVerlauf(log, 8, heuteKey)
+  const muskelListe = Object.entries(vol).sort((a, b) => b[1] - a[1])
+  const hatDaten = log.length > 0
+
+  return (
+    <section className="mt-8">
+      <SectionTitle
+        right={
+          <div className="flex rounded-lg border border-[color:var(--ov-10)] bg-surface-2 p-0.5 text-xs">
+            {[{ w: 1, l: "1 Woche" }, { w: 4, l: "4 Wochen" }].map((o) => (
+              <button
+                key={o.w}
+                onClick={() => setWochen(o.w)}
+                className={cx(
+                  "rounded-md px-2.5 py-1 font-medium transition-colors",
+                  wochen === o.w ? "bg-accent-gradient text-white" : "text-muted hover:text-ink"
+                )}
+              >
+                {o.l}
+              </button>
+            ))}
+          </div>
+        }
+      >
+        Analyse
+      </SectionTitle>
+
+      {!hatDaten ? (
+        <Card className="mt-3 p-6 text-center text-sm text-muted">
+          Noch keine Daten – logge Sätze in einer Session, dann erscheinen hier
+          deine Muskel-Auslastung, Rekorde und Konsistenz.
+        </Card>
+      ) : (
+        <div className="mt-3 grid gap-4 lg:grid-cols-2">
+          {/* Heatmap + Volumen je Muskel */}
+          <Card className="p-5">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-faint">
+              Muskel-Auslastung {wochen > 1 ? `(${wochen} Wochen)` : "(diese Woche)"}
+            </p>
+            <div className="mt-2">
+              <Koerperkarte intensitaet={intens} labels />
+            </div>
+            <div className="mt-2 flex items-center gap-2 text-[10px] text-faint">
+              <span>wenig</span>
+              <span className="h-2 flex-1 rounded-full" style={{ background: "linear-gradient(90deg, color-mix(in srgb, var(--color-accent) 22%, transparent), var(--color-accent))" }} />
+              <span>viel</span>
+            </div>
+            {muskelListe.length > 0 && (
+              <ul className="mt-3 space-y-1.5">
+                {muskelListe.map(([m, saetze]) => {
+                  const b = BEWERTUNG_STIL[bewertung(saetze / wochen)]
+                  return (
+                    <li key={m} className="flex items-center gap-2 text-sm">
+                      <span className="w-28 shrink-0 text-muted">{MUSKELGRUPPEN[m]?.name ?? m}</span>
+                      <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-[color:var(--ov-10)]">
+                        <div className="h-full rounded-full bg-accent-gradient"
+                          style={{ width: `${Math.min(100, (saetze / wochen / VOLUMEN_OPT) * 100)}%` }} />
+                      </div>
+                      <span className="w-10 shrink-0 text-right tabular-nums text-ink">{saetze}</span>
+                      <span className={cx("shrink-0 rounded px-1.5 py-0.5 text-[10px] font-medium", b.chip)}>{b.label}</span>
+                    </li>
+                  )
+                })}
+              </ul>
+            )}
+            <p className="mt-2 text-[10px] text-faint">Richtwert: {VOLUMEN_MIN}–{VOLUMEN_OPT} Sätze / Muskel / Woche.</p>
+          </Card>
+
+          {/* Konsistenz + Tonnage + Rekorde */}
+          <div className="space-y-4">
+            <Card className="p-5">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-faint">Konsistenz</p>
+              <div className="mt-2 grid grid-cols-3 gap-2 text-center">
+                <KennZahl wert={kons.serie} label={kons.serie === 1 ? "Woche Serie" : "Wochen Serie"} akzent />
+                <KennZahl wert={kons.tage7} label="Tage / 7" />
+                <KennZahl wert={kons.tage28} label="Tage / 28" />
+              </div>
+              <TonnageChart reihen={tonnage} />
+            </Card>
+
+            <Card className="p-5">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-faint">Persönliche Rekorde</p>
+              <ul className="mt-2 divide-y divide-[color:var(--ov-06)]">
+                {prs.map((r) => (
+                  <li key={r.uebungId} className="flex items-center gap-3 py-2 text-sm">
+                    <span className="flex-1 truncate text-ink">{r.name}</span>
+                    <span className="font-semibold text-accent-soft">
+                      {r.koerpergewicht ? `${r.wdh} Wdh.` : `${r.wert} kg`}
+                    </span>
+                    <span className="w-16 shrink-0 text-right text-xs text-faint">
+                      {new Date(`${r.datum}T00:00:00`).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" })}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          </div>
+        </div>
+      )}
+    </section>
+  )
+}
+
+function KennZahl({ wert, label, akzent }) {
+  return (
+    <div className="rounded-xl bg-[color:var(--ov-05)] py-3">
+      <p className={cx("text-2xl font-bold tabular-nums", akzent ? "text-gradient" : "text-ink")}>{wert}</p>
+      <p className="mt-0.5 text-[10px] uppercase tracking-wide text-faint">{label}</p>
+    </div>
+  )
+}
+
+// Kleiner Balken-Trend der Wochen-Tonnage (8 Wochen).
+function TonnageChart({ reihen }) {
+  const max = Math.max(1, ...reihen.map((r) => r.tonnage))
+  return (
+    <div className="mt-4">
+      <p className="text-[10px] uppercase tracking-wide text-faint">Volumen / Woche (kg×Wdh)</p>
+      <div className="mt-2 flex h-16 items-end gap-1">
+        {reihen.map((r, i) => (
+          <div key={i} className="flex-1" title={`${r.tonnage} kg×Wdh`}>
+            <div
+              className={cx("w-full rounded-t", i === reihen.length - 1 ? "bg-accent-gradient" : "bg-[color:var(--ov-15)]")}
+              style={{ height: `${Math.max(3, (r.tonnage / max) * 56)}px` }}
+            />
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
@@ -621,7 +778,7 @@ function Diagramm({ verlauf, einheit }) {
           key={f}
           x1={P} x2={W - P}
           y1={P + f * (H - 2 * P)} y2={P + f * (H - 2 * P)}
-          stroke="#ffffff" strokeOpacity="0.06"
+          style={{ stroke: "var(--color-hair)" }} strokeOpacity="0.7"
         />
       ))}
       {/* Fläche unter der Kurve */}
@@ -634,13 +791,13 @@ function Diagramm({ verlauf, einheit }) {
         <circle key={i} cx={x(i)} cy={y(v.best)} r={i === verlauf.length - 1 ? 5 : 3.5} fill="#a5b4fc" />
       ))}
       {/* Beschriftung: letzter Wert + Achsen-Enden */}
-      <text x={x(verlauf.length - 1)} y={y(verlauf[verlauf.length - 1].best) - 10} textAnchor="end" fill="#f3f4f8" style={{ fontSize: 12, fontWeight: 600 }}>
+      <text x={x(verlauf.length - 1)} y={y(verlauf[verlauf.length - 1].best) - 10} textAnchor="end" style={{ fontSize: 12, fontWeight: 600, fill: "var(--color-ink)" }}>
         {verlauf[verlauf.length - 1].best} {einheit}
       </text>
-      <text x={P} y={H - 8} fill="#6b7280" style={{ fontSize: 10 }}>
+      <text x={P} y={H - 8} style={{ fontSize: 10, fill: "var(--color-faint)" }}>
         {datumKurz(verlauf[0].datum)}
       </text>
-      <text x={W - P} y={H - 8} textAnchor="end" fill="#6b7280" style={{ fontSize: 10 }}>
+      <text x={W - P} y={H - 8} textAnchor="end" style={{ fontSize: 10, fill: "var(--color-faint)" }}>
         {datumKurz(verlauf[verlauf.length - 1].datum)}
       </text>
     </svg>
