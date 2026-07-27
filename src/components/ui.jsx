@@ -108,6 +108,33 @@ export function Stat({ label, value }) {
   )
 }
 
+// Fortschritts-Ring (SVG-Donut) mit optionalem, zentriertem Label.
+export function Ring({
+  value, max, size = 46, stroke = 5,
+  color = "var(--color-accent)", track = "var(--ov-10)", label,
+}) {
+  const r = (size - stroke - 1) / 2
+  const c = 2 * Math.PI * r
+  const p = max ? Math.min(1, value / max) : 0
+  return (
+    <svg width={size} height={size} className="shrink-0">
+      <circle cx={size / 2} cy={size / 2} r={r} fill="none" strokeWidth={stroke} style={{ stroke: track }} />
+      <circle
+        cx={size / 2} cy={size / 2} r={r} fill="none" strokeWidth={stroke} strokeLinecap="round"
+        strokeDasharray={c} strokeDashoffset={c * (1 - p)}
+        transform={`rotate(-90 ${size / 2} ${size / 2})`}
+        style={{ stroke: color, transition: "stroke-dashoffset .35s ease" }}
+      />
+      {label != null && (
+        <text x="50%" y="50%" textAnchor="middle" dominantBaseline="central"
+          style={{ fill: "var(--color-ink)", fontSize: Math.round(size * 0.26), fontWeight: 600 }}>
+          {label}
+        </text>
+      )}
+    </svg>
+  )
+}
+
 // Icon-Set (Inline-SVG, keine Dependency) ---------------------------------
 function Svg({ children, className }) {
   return (
