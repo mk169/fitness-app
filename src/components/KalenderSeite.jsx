@@ -36,7 +36,7 @@ function useProgramme() {
 }
 
 // ---- Habit-Tracker (Tagesansicht zum Abhaken) ---------------------------
-function HabitTracker() {
+export function HabitTracker() {
   const [checks, setChecks] = useStored("checks", {})
   const [eigene, setEigene] = useStored("habits", [])
   const [wochenplan] = useStored("trainingsplanUebungen", {})

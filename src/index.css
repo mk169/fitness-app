@@ -48,22 +48,31 @@
 /* Basis ------------------------------------------------------------------- */
 html {
   color-scheme: dark;
+  /* Sicherheitsnetz: unbemalte Bereiche zeigen die Theme-Fläche statt Schwarz. */
+  background-color: var(--color-bg);
 }
 
 body {
   margin: 0;
   background-color: var(--color-bg);
-  /* Dezente Akzent-Aura oben – gibt der App mehr Tiefe. */
-  background-image:
-    radial-gradient(60rem 40rem at 50% -18rem, color-mix(in srgb, var(--color-accent) 14%, transparent), transparent),
-    radial-gradient(50rem 40rem at 110% 0%, color-mix(in srgb, var(--color-accent-2) 8%, transparent), transparent);
-  background-attachment: fixed;
-  background-repeat: no-repeat;
   color: var(--color-ink);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+/* Dezente Akzent-Aura als fixes Overlay hinter dem Inhalt. Bewusst NICHT über
+   background-attachment: fixed (verursacht auf iOS-Safari schwarze Flächen). */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(60rem 40rem at 50% -18rem, color-mix(in srgb, var(--color-accent) 14%, transparent), transparent),
+    radial-gradient(50rem 40rem at 110% 0%, color-mix(in srgb, var(--color-accent-2) 8%, transparent), transparent);
 }
 
 /* Tabellarische Ziffern für Zahlen/Timer */

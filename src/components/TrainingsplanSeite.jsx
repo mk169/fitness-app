@@ -134,7 +134,7 @@ function AnalyseSektion() {
           deine Muskel-Auslastung, Rekorde und Konsistenz.
         </Card>
       ) : (
-        <div className="mt-3 grid gap-4 lg:grid-cols-2">
+        <div className="mt-3 grid grid-cols-1 gap-4 lg:grid-cols-2">
           {/* Heatmap + Volumen je Muskel */}
           <Card className="p-5">
             <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-faint">
@@ -186,7 +186,7 @@ function AnalyseSektion() {
               <ul className="mt-2 divide-y divide-[color:var(--ov-06)]">
                 {prs.map((r) => (
                   <li key={r.uebungId} className="flex items-center gap-3 py-2 text-sm">
-                    <span className="flex-1 truncate text-ink">{r.name}</span>
+                    <span className="min-w-0 flex-1 truncate text-ink">{r.name}</span>
                     <span className="font-semibold text-accent-soft">
                       {r.koerpergewicht ? `${r.wdh} Wdh.` : `${r.wert} kg`}
                     </span>
@@ -299,7 +299,7 @@ function Wochenplan({ wochenplan, splitWahl, tageWahl, tagKey }) {
   return (
     <section className="mt-8">
       <SectionTitle>Wochenplan</SectionTitle>
-      <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
         {WOCHENTAGE.map((t) => {
           const eintraege = planTag(wochenplan, t.key)
           const istHeute = t.key === tagKey
@@ -309,7 +309,7 @@ function Wochenplan({ wochenplan, splitWahl, tageWahl, tagKey }) {
             <div
               key={t.key}
               className={cx(
-                "rounded-xl border bg-surface p-3.5",
+                "min-w-0 rounded-xl border bg-surface p-3.5",
                 istHeute ? "border-accent/60" : "border-[color:var(--ov-06)]"
               )}
             >
