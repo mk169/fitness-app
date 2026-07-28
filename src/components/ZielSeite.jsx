@@ -50,8 +50,67 @@ const TAG_LABELS = [
   { key: "so", label: "So" },
 ]
 
+const ZIEL_TABS = [
+  { key: "uebersicht", label: "Übersicht" },
+  { key: "training", label: "Training" },
+  { key: "ernaehrung", label: "Ernährung" },
+  { key: "erfolge", label: "Erfolge" },
+]
+
 export default function ZielSeite() {
   const { profil, setProfil, plan } = useZiel()
+  const [tab, setTab] = useState("uebersicht")
+
+  return (
+    <div>
+      <PageHeader
+        title="Ziel & Anpassung"
+        subtitle="Ziel, Training und Ernährung – in vier Bereichen, jederzeit änderbar."
+      />
+
+      {/* Bereichs-Umschalter */}
+      <div className="mt-5 -mx-1 overflow-x-auto px-1">
+        <div className="inline-flex min-w-full gap-0.5 rounded-xl border border-[color:var(--ov-10)] bg-surface-2 p-0.5">
+          {ZIEL_TABS.map((t) => (
+            <button
+              key={t.key}
+              onClick={() => setTab(t.key)}
+              className={cx(
+                "flex-1 whitespace-nowrap rounded-lg px-2.5 py-2 text-[13px] font-medium transition-colors sm:px-4 sm:text-sm",
+                tab === t.key
+                  ? "bg-accent-gradient text-white shadow-[var(--shadow-glow)]"
+                  : "text-muted hover:text-ink"
+              )}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {tab === "uebersicht" && <Uebersicht profil={profil} setProfil={setProfil} plan={plan} />}
+      {tab === "training" && (
+        <div className="mt-2">
+          <TrainingAnpassen profil={profil} setProfil={setProfil} />
+        </div>
+      )}
+      {tab === "ernaehrung" && (
+        <div className="mt-2">
+          <ErnaehrungAnpassen />
+          <FastenPhasen />
+        </div>
+      )}
+      {tab === "erfolge" && (
+        <div className="mt-2">
+          <Erfolge />
+        </div>
+      )}
+    </div>
+  )
+}
+
+// Übersicht: Ziel-Modus + Körperdaten (links) und der berechnete Plan (rechts).
+function Uebersicht({ profil, setProfil, plan }) {
   const set = (feld) => (e) => {
     const v = e.target.value
     const zahl = ["alter", "groesse", "gewicht", "zielGewicht", "kfa", "zeitProEinheit"]
@@ -59,82 +118,69 @@ export default function ZielSeite() {
   }
 
   return (
-    <div>
-      <PageHeader
-        title="Ziel & Anpassung"
-        subtitle="Ziel, Trainingsplan und Ernährung – alles hier einstellbar, jederzeit änderbar."
-      />
+    <div className="mt-6 grid gap-4 lg:grid-cols-2">
+      {/* Eingaben */}
+      <Card className="p-5">
+        <SectionTitle>Ziel-Modus</SectionTitle>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {Object.entries(ZIEL_MODI).map(([key, m]) => (
+            <Pill
+              key={key}
+              active={profil.modus === key}
+              onClick={() => setProfil({ ...profil, modus: key })}
+            >
+              {m.name}
+            </Pill>
+          ))}
+        </div>
 
-      <div className="mt-6 grid gap-4 lg:grid-cols-2">
-        {/* Eingaben */}
-        <Card className="p-5">
-          <SectionTitle>Ziel-Modus</SectionTitle>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {Object.entries(ZIEL_MODI).map(([key, m]) => (
-              <Pill
-                key={key}
-                active={profil.modus === key}
-                onClick={() => setProfil({ ...profil, modus: key })}
-              >
-                {m.name}
-              </Pill>
-            ))}
-          </div>
+        <SectionTitle className="mt-5">Körperdaten</SectionTitle>
+        <div className="mt-3 grid grid-cols-2 gap-3">
+          <Feld label="Geschlecht">
+            <select value={profil.geschlecht} onChange={set("geschlecht")} className={inputCls}>
+              <option value="m">Männlich</option>
+              <option value="w">Weiblich</option>
+            </select>
+          </Feld>
+          <Feld label="Alter">
+            <input type="number" value={profil.alter} onChange={set("alter")} className={inputCls} />
+          </Feld>
+          <Feld label="Größe (cm)">
+            <input type="number" value={profil.groesse} onChange={set("groesse")} className={inputCls} />
+          </Feld>
+          <Feld label="Gewicht (kg)">
+            <input type="number" value={profil.gewicht} onChange={set("gewicht")} className={inputCls} />
+          </Feld>
+          <Feld label="Zielgewicht (kg)">
+            <input type="number" value={profil.zielGewicht} onChange={set("zielGewicht")} className={inputCls} />
+          </Feld>
+          <Feld label="KFA % (optional)">
+            <input
+              type="number" min="3" max="60" step="0.5"
+              value={profil.kfa || ""} onChange={set("kfa")}
+              placeholder="unbekannt"
+              title="Körperfettanteil – macht die Kalorienberechnung genauer (Katch-McArdle)"
+              className={inputCls}
+            />
+          </Feld>
+          <Feld label="Aktivität">
+            <select value={profil.aktivitaet} onChange={set("aktivitaet")} className={inputCls}>
+              {Object.entries(AKTIVITAET).map(([key, a]) => (
+                <option key={key} value={key}>{a.name}</option>
+              ))}
+            </select>
+          </Feld>
+          <Feld label="Zeit / Einheit (Min.)">
+            <input type="number" min="20" step="10" value={profil.zeitProEinheit} onChange={set("zeitProEinheit")} className={inputCls} />
+          </Feld>
+          <Feld label="Deadline">
+            <input type="date" min={heute()} value={profil.deadline} onChange={set("deadline")} className={inputCls} />
+          </Feld>
+        </div>
+      </Card>
 
-          <SectionTitle className="mt-5">Körperdaten</SectionTitle>
-          <div className="mt-3 grid grid-cols-2 gap-3">
-            <Feld label="Geschlecht">
-              <select value={profil.geschlecht} onChange={set("geschlecht")} className={inputCls}>
-                <option value="m">Männlich</option>
-                <option value="w">Weiblich</option>
-              </select>
-            </Feld>
-            <Feld label="Alter">
-              <input type="number" value={profil.alter} onChange={set("alter")} className={inputCls} />
-            </Feld>
-            <Feld label="Größe (cm)">
-              <input type="number" value={profil.groesse} onChange={set("groesse")} className={inputCls} />
-            </Feld>
-            <Feld label="Gewicht (kg)">
-              <input type="number" value={profil.gewicht} onChange={set("gewicht")} className={inputCls} />
-            </Feld>
-            <Feld label="Zielgewicht (kg)">
-              <input type="number" value={profil.zielGewicht} onChange={set("zielGewicht")} className={inputCls} />
-            </Feld>
-            <Feld label="KFA % (optional)">
-              <input
-                type="number" min="3" max="60" step="0.5"
-                value={profil.kfa || ""} onChange={set("kfa")}
-                placeholder="unbekannt"
-                title="Körperfettanteil – macht die Kalorienberechnung genauer (Katch-McArdle)"
-                className={inputCls}
-              />
-            </Feld>
-            <Feld label="Aktivität">
-              <select value={profil.aktivitaet} onChange={set("aktivitaet")} className={inputCls}>
-                {Object.entries(AKTIVITAET).map(([key, a]) => (
-                  <option key={key} value={key}>{a.name}</option>
-                ))}
-              </select>
-            </Feld>
-            <Feld label="Zeit / Einheit (Min.)">
-              <input type="number" min="20" step="10" value={profil.zeitProEinheit} onChange={set("zeitProEinheit")} className={inputCls} />
-            </Feld>
-            <Feld label="Deadline">
-              <input type="date" min={heute()} value={profil.deadline} onChange={set("deadline")} className={inputCls} />
-            </Feld>
-          </div>
-        </Card>
-
-        {/* Ergebnis des Algorithmus */}
-        <Ergebnis plan={plan} />
-      </div>
-
-      <Erfolge />
-
-      <TrainingAnpassen profil={profil} setProfil={setProfil} />
-      <ErnaehrungAnpassen />
-      <FastenPhasen />
+      {/* Ergebnis des Algorithmus */}
+      <Ergebnis plan={plan} />
     </div>
   )
 }
