@@ -103,8 +103,15 @@ export default function App() {
   const [authBereit, setAuthBereit] = useState(!cloudAktiv)
   // Erst-Einrichtung: bis abgeschlossen wird der Onboarding-Assistent gezeigt.
   const [onboardingFertig, setOnboardingFertig] = useStored("onboardingFertig", false)
+  // Vom Dashboard „Training starten": Training öffnen und Session direkt starten.
+  const [trainingAutostart, setTrainingAutostart] = useState(false)
   // Gewählten Stil laden und auf das Wurzelelement anwenden.
   useStil()
+
+  const startTraining = () => {
+    setTrainingAutostart(true)
+    setSeite("training")
+  }
 
   // Auth-Status verfolgen (nur wenn Supabase konfiguriert ist).
   useEffect(() => {
@@ -145,10 +152,17 @@ export default function App() {
             key={seite}
             className="animate-page mx-auto max-w-5xl overflow-x-clip px-4 pb-28 pt-6 sm:px-6 sm:pt-10 md:pb-14"
           >
-            {seite === "dashboard" && <Dashboard onNavigate={navigiere} />}
+            {seite === "dashboard" && (
+              <Dashboard onNavigate={navigiere} onStartTraining={startTraining} />
+            )}
             {seite === "ziel" && <ZielSeite onBack={zurueck} />}
             {seite === "training" && (
-              <TrainingsplanSeite onBack={zurueck} onZiel={() => navigiere("ziel")} />
+              <TrainingsplanSeite
+                onBack={zurueck}
+                onZiel={() => navigiere("ziel")}
+                autostart={trainingAutostart}
+                onAutostartFertig={() => setTrainingAutostart(false)}
+              />
             )}
             {seite === "ernaehrung" && <ErnaehrungsplanSeite onBack={zurueck} />}
             {seite === "kalender" && <KalenderSeite onBack={zurueck} />}
