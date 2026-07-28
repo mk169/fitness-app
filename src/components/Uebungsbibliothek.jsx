@@ -2,7 +2,9 @@ import { useMemo, useState } from "react"
 import { createPortal } from "react-dom"
 import { UEBUNGEN, KATEGORIEN, MUSKELGRUPPEN } from "../lib/uebungen"
 import { uebungDetail } from "../lib/uebungDetails"
+import { musterVon } from "../lib/uebungAnimation"
 import Koerperkarte from "./Koerperkarte"
+import UebungAnimation from "./UebungAnimation"
 import { Card, SectionTitle, Pill, Button, inputCls, cx } from "./ui"
 
 // Durchsuchbare Übungsbibliothek mit Detailansicht: tippe eine Übung an und
@@ -90,6 +92,7 @@ export default function Uebungsbibliothek() {
 
 // Detail-Overlay einer einzelnen Übung.
 export function UebungDetailModal({ id, onClose }) {
+  const [ansicht, setAnsicht] = useState("bewegung")
   const d = uebungDetail(id)
   if (!d) return null
 
@@ -165,17 +168,44 @@ export function UebungDetailModal({ id, onClose }) {
           </div>
 
           <div className="mx-auto w-full max-w-[260px]">
-            <Koerperkarte intensitaet={d.zielKarte} labels />
-            <div className="mt-2 flex items-center justify-center gap-4 text-[11px] text-muted">
-              <span className="flex items-center gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-full" style={{ background: "var(--color-accent)" }} />
-                primär
-              </span>
-              <span className="flex items-center gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-full" style={{ background: "color-mix(in srgb, var(--color-accent) 45%, transparent)" }} />
-                unterstützend
-              </span>
+            <div className="mb-3 flex rounded-lg border border-[color:var(--ov-10)] bg-surface-2 p-0.5 text-xs">
+              {[
+                { k: "bewegung", l: "Bewegung" },
+                { k: "muskeln", l: "Muskeln" },
+              ].map((o) => (
+                <button
+                  key={o.k}
+                  onClick={() => setAnsicht(o.k)}
+                  className={cx(
+                    "flex-1 rounded-md px-2.5 py-1 font-medium transition-colors",
+                    ansicht === o.k ? "bg-accent-gradient text-white" : "text-muted hover:text-ink"
+                  )}
+                >
+                  {o.l}
+                </button>
+              ))}
             </div>
+
+            {ansicht === "bewegung" ? (
+              <div className="rounded-2xl border border-[color:var(--ov-06)] bg-surface-2 p-3">
+                <UebungAnimation muster={musterVon(d)} />
+                <p className="mt-1 text-center text-[11px] text-faint">Bewegungsablauf – Schleife</p>
+              </div>
+            ) : (
+              <>
+                <Koerperkarte intensitaet={d.zielKarte} labels />
+                <div className="mt-2 flex items-center justify-center gap-4 text-[11px] text-muted">
+                  <span className="flex items-center gap-1.5">
+                    <span className="h-2.5 w-2.5 rounded-full" style={{ background: "var(--color-accent)" }} />
+                    primär
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="h-2.5 w-2.5 rounded-full" style={{ background: "color-mix(in srgb, var(--color-accent) 45%, transparent)" }} />
+                    unterstützend
+                  </span>
+                </div>
+              </>
+            )}
           </div>
         </div>
 
