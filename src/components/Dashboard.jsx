@@ -5,8 +5,8 @@ import { HabitTracker, ProgrammeSektion } from "./KalenderSeite"
 import { useZiel } from "./ZielSeite"
 import { WOCHEN_KEYS, standardTage, tagesName, normEintrag } from "../lib/splits"
 import { uebungVon } from "../lib/uebungen"
-import { konzeptVon, methodeVon, FARBEN, FASTEN_STANDARD } from "../lib/ernaehrung"
-import { Card, SectionLink, Button, cx } from "./ui"
+import { konzeptVon } from "../lib/ernaehrung"
+import { Card, SectionLink, Button, Ring } from "./ui"
 
 function begruessung() {
   const stunde = new Date().getHours()
@@ -86,27 +86,52 @@ function TrainingHeute({ onStart, onOeffnen }) {
   )
 }
 
-// ---- Ernährung: Konzept, Fasten, kcal-Ziel -------------------------------
+// ---- Ernährung heute: Makro-Ringe (verbraucht vs. Ziel) ------------------
 function ErnaehrungVorschau({ plan, onOeffnen }) {
+  const [mahlzeiten] = useStored("mahlzeiten", [])
   const [konzeptId] = useStored("ernaehrungKonzept", "standard")
-  const [fasten] = useStored("fasten", FASTEN_STANDARD)
   const konzept = konzeptVon(konzeptId)
-  const methode = methodeVon(fasten.methode)
+  const heuteKey = heute()
+
+  const s = mahlzeiten
+    .filter((m) => m.datum === heuteKey)
+    .reduce(
+      (a, m) => ({
+        kcal: a.kcal + (m.kcal || 0),
+        protein: a.protein + (m.protein || 0),
+        fett: a.fett + (m.fett || 0),
+        kh: a.kh + (m.kohlenhydrate || 0),
+      }),
+      { kcal: 0, protein: 0, fett: 0, kh: 0 }
+    )
+  const z = plan?.makros
 
   return (
     <Card as="button" onClick={onOeffnen} className="w-full p-5 text-left transition-colors hover:border-accent/40">
       <div className="flex items-center justify-between">
-        <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-faint">Ernährung</span>
+        <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-faint">Ernährung heute</span>
         <span className="text-accent/60">→</span>
       </div>
-      <p className="mt-2 flex items-center gap-2 text-lg font-semibold text-ink">
-        <span className={cx("h-2.5 w-2.5 rounded-full", FARBEN[konzept.farbe].punkt)} />
+      <div className="mt-3 flex flex-wrap items-start justify-around gap-3">
+        <RingMini label="kcal" value={s.kcal} max={plan?.kalorien} color="var(--color-accent)" gross />
+        <RingMini label="Protein" value={s.protein} max={z?.protein} color="var(--color-rose-300)" einheit="g" />
+        <RingMini label="Fett" value={s.fett} max={z?.fett} color="var(--color-amber-300)" einheit="g" />
+        <RingMini label="Carbs" value={s.kh} max={z?.kohlenhydrate} color="var(--color-sky-300)" einheit="g" />
+      </div>
+      <p className="mt-3 text-center text-xs text-muted">
         {konzept.name}
-      </p>
-      <p className="mt-0.5 text-sm text-muted">
-        Fasten: {methode.name}
-        {plan ? ` · ${plan.kalorien} kcal Ziel` : ""}
+        {plan ? ` · Ziel ${plan.kalorien} kcal` : ""}
       </p>
     </Card>
+  )
+}
+
+function RingMini({ label, value, max, color, einheit, gross }) {
+  return (
+    <div className="flex flex-col items-center gap-1">
+      <Ring value={value} max={max || value || 1} color={color} size={gross ? 66 : 56} stroke={gross ? 6 : 5} label={`${value}`} />
+      <p className="text-[11px] font-medium text-ink">{label}</p>
+      {max ? <p className="text-[10px] text-faint">/ {max} {einheit}</p> : null}
+    </div>
   )
 }

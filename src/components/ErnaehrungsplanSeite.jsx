@@ -155,13 +155,33 @@ function MakroZiele({ plan }) {
   )
 }
 
+// Konkrete, zielgenaue Mini-Empfehlung (nutzt die berechneten Werte).
+function zielTipp(modus, plan) {
+  if (!plan) return null
+  const p = plan.makros.protein
+  const kcal = plan.kalorien
+  switch (modus) {
+    case "abnehmen":
+      return `Moderates Defizit um ${kcal} kcal halten und Protein hoch (~${p} g) – so verlierst du Fett und schützt Muskeln.`
+    case "schneller_cut":
+      return `Straffes Defizit (${kcal} kcal), Protein besonders hoch (~${p} g) und viel Gemüse für Sättigung.`
+    case "muskeln":
+      return `Leichter Überschuss (${kcal} kcal), ~${p} g Protein und Kohlenhydrate rund ums Training für sauberen Aufbau.`
+    case "zunehmen":
+      return `Klarer Überschuss (${kcal} kcal) – energiedichte Lebensmittel erleichtern die kcal; ~${p} g Protein.`
+    default:
+      return `Erhaltung um ${kcal} kcal und ~${p} g Protein, um Form & Leistung stabil zu halten.`
+  }
+}
+
 function KonzeptWahl() {
   const [gewaehlt, setGewaehlt] = useStored("ernaehrungKonzept", "standard")
-  const { profil } = useZiel()
+  const { profil, plan } = useZiel()
   const konzept = konzeptVon(gewaehlt)
   const farbe = FARBEN[konzept.farbe]
   const modus = ZIEL_MODI[profil.modus]
   const passt = konzept.passtZu?.includes(profil.modus)
+  const zt = zielTipp(profil.modus, plan)
 
   return (
     <section className="mt-8">
@@ -192,6 +212,15 @@ function KonzeptWahl() {
         </div>
 
         <p className="mt-2 text-sm leading-relaxed text-muted">{konzept.idee}</p>
+
+        {zt && (
+          <div className="mt-3 rounded-xl border border-accent/30 bg-accent/10 p-3.5">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-accent-soft">
+              🎯 Für dein Ziel{modus ? ` · ${modus.name}` : ""}
+            </p>
+            <p className="mt-1 text-sm leading-relaxed text-ink/90">{zt}</p>
+          </div>
+        )}
 
         {konzept.wissenschaft && (
           <div className="mt-3 rounded-xl border border-[color:var(--ov-06)] bg-[color:var(--ov-05)] p-3.5">
