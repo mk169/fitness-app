@@ -97,7 +97,7 @@ function BottomBar({ seite, onNavigate }) {
 }
 
 export default function App() {
-  const [seite, setSeite] = useState("dashboard")
+  const [seite, setSeite] = useState("training")
   // Ohne Cloud gibt es keinen Login – dann gilt die App sofort als bereit.
   const [session, setSession] = useState(null)
   const [authBereit, setAuthBereit] = useState(!cloudAktiv)
@@ -143,7 +143,7 @@ export default function App() {
         <ErrorBoundary key={seite}>
           <div
             key={seite}
-            className="animate-page mx-auto max-w-5xl px-4 pb-28 pt-6 sm:px-6 sm:pt-10 md:pb-14"
+            className="animate-page mx-auto max-w-5xl overflow-x-clip px-4 pb-28 pt-6 sm:px-6 sm:pt-10 md:pb-14"
           >
             {seite === "dashboard" && <Dashboard onNavigate={navigiere} />}
             {seite === "ziel" && <ZielSeite onBack={zurueck} />}
