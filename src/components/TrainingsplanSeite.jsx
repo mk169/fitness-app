@@ -32,7 +32,7 @@ function heutigerTagKey() {
   return WOCHEN_KEYS[(new Date().getDay() + 6) % 7]
 }
 
-export default function TrainingsplanSeite({ onZiel }) {
+export default function TrainingsplanSeite({ onZiel, autostart, onAutostartFertig }) {
   const [wochenplan] = useStored("trainingsplanUebungen", LEER)
   const { profil } = useZiel()
   const [sessionAktiv, setSessionAktiv] = useState(false)
@@ -40,6 +40,14 @@ export default function TrainingsplanSeite({ onZiel }) {
   const tagKey = heutigerTagKey()
   const heuteEintraege = planTag(wochenplan, tagKey)
   const tageWahl = profil.tageWahl ?? standardTage(profil.trainingsTage ?? 3)
+
+  // Vom Dashboard „Training starten": Session direkt öffnen (wenn heute etwas ansteht).
+  useEffect(() => {
+    if (!autostart) return
+    if (heuteEintraege.length > 0) setSessionAktiv(true)
+    onAutostartFertig?.()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
   const splitWahl = profil.splitWahl ?? "oberUnter"
 
   if (sessionAktiv) {

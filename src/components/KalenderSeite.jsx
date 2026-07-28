@@ -36,7 +36,7 @@ function useProgramme() {
 }
 
 // ---- Habit-Tracker (Tagesansicht zum Abhaken) ---------------------------
-export function HabitTracker() {
+export function HabitTracker({ nurAnzeige = false } = {}) {
   const [checks, setChecks] = useStored("checks", {})
   const [eigene, setEigene] = useStored("habits", [])
   const [wochenplan] = useStored("trainingsplanUebungen", {})
@@ -114,7 +114,7 @@ export function HabitTracker() {
                   )}
                 </span>
                 {s > 0 && <span className="text-xs font-semibold text-amber-300">🔥 {s}</span>}
-                {!h.auto && (
+                {!h.auto && !nurAnzeige && (
                   <button onClick={() => removeHabit(h.id)} title="Habit entfernen"
                     className="text-faint transition-colors hover:text-rose-400">
                     ×
@@ -125,8 +125,9 @@ export function HabitTracker() {
           })}
         </ul>
 
-        {/* Habit hinzufügen */}
-        <div className="mt-3 border-t border-[color:var(--ov-06)] pt-3">
+        {/* Habit hinzufügen – nur in der vollen Ansicht (Kalender-Seite) */}
+        {!nurAnzeige && (
+          <div className="mt-3 border-t border-[color:var(--ov-06)] pt-3">
           <div className="flex gap-2">
             <input
               value={neu}
@@ -150,7 +151,8 @@ export function HabitTracker() {
               ))}
             </div>
           )}
-        </div>
+          </div>
+        )}
       </Card>
     </section>
   )
@@ -168,7 +170,7 @@ function NavBtn({ children, onClick }) {
 }
 
 // ---- Programme & Phasen (Timeline) --------------------------------------
-function ProgrammeSektion() {
+export function ProgrammeSektion() {
   const { programme, setProgramme, alle } = useProgramme()
   const heuteKey = heute()
   const [offen, setOffen] = useState(false)
