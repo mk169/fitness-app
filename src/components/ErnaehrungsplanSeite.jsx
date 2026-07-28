@@ -5,6 +5,7 @@ import {
   FASTEN_STANDARD, phasenStatus,
 } from "../lib/ernaehrung"
 import { heute } from "../lib/datum"
+import { ZIEL_MODI } from "../lib/algorithmus"
 import { LEBENSMITTEL, lebensmittelVon, makrosFuer } from "../lib/lebensmittel"
 import { useZiel, PROFIL_STANDARD } from "./ZielSeite"
 import { Card, PageHeader, SectionTitle, Button, Pill, Ring, cx, labelCls } from "./ui"
@@ -156,8 +157,11 @@ function MakroZiele({ plan }) {
 
 function KonzeptWahl() {
   const [gewaehlt, setGewaehlt] = useStored("ernaehrungKonzept", "standard")
+  const { profil } = useZiel()
   const konzept = konzeptVon(gewaehlt)
   const farbe = FARBEN[konzept.farbe]
+  const modus = ZIEL_MODI[profil.modus]
+  const passt = konzept.passtZu?.includes(profil.modus)
 
   return (
     <section className="mt-8">
@@ -170,17 +174,69 @@ function KonzeptWahl() {
           </Pill>
         ))}
       </div>
+
       <Card className="mt-3 p-5">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <h3 className="text-lg font-semibold text-ink">{konzept.name}</h3>
           <span className={cx("rounded-full px-2 py-0.5 text-[10px] font-medium", farbe.chip)}>{konzept.kurz}</span>
+          {modus && konzept.passtZu && (
+            <span
+              className={cx(
+                "ml-auto rounded-full px-2.5 py-1 text-[11px] font-medium",
+                passt ? "bg-emerald-500/15 text-emerald-300" : "bg-amber-500/15 text-amber-300"
+              )}
+            >
+              {passt ? `✓ passt zu „${modus.name}"` : `für „${modus.name}" nur bedingt`}
+            </span>
+          )}
         </div>
+
         <p className="mt-2 text-sm leading-relaxed text-muted">{konzept.idee}</p>
-        <ul className="mt-3 space-y-1.5">
+
+        {konzept.wissenschaft && (
+          <div className="mt-3 rounded-xl border border-[color:var(--ov-06)] bg-[color:var(--ov-05)] p-3.5">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-faint">🔬 Was die Wissenschaft sagt</p>
+            <p className="mt-1 text-sm leading-relaxed text-ink/90">{konzept.wissenschaft}</p>
+          </div>
+        )}
+
+        {(konzept.staerken || konzept.beachten) && (
+          <div className="mt-3 grid gap-4 sm:grid-cols-2">
+            {konzept.staerken && (
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-emerald-400">Stärken</p>
+                <ul className="mt-1.5 space-y-1">
+                  {konzept.staerken.map((s, i) => (
+                    <li key={i} className="flex gap-2 text-sm text-ink/90">
+                      <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400" />
+                      <span className="min-w-0">{s}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {konzept.beachten && (
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-amber-400">Beachten</p>
+                <ul className="mt-1.5 space-y-1">
+                  {konzept.beachten.map((s, i) => (
+                    <li key={i} className="flex gap-2 text-sm text-ink/90">
+                      <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-400" />
+                      <span className="min-w-0">{s}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
+
+        <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-faint">So setzt du's um</p>
+        <ul className="mt-1.5 space-y-1.5">
           {konzept.prinzipien.map((p, i) => (
             <li key={i} className="flex gap-2 text-sm text-ink/90">
               <span className={cx("mt-2 h-1.5 w-1.5 shrink-0 rounded-full", farbe.punkt)} />
-              {p}
+              <span className="min-w-0">{p}</span>
             </li>
           ))}
         </ul>
