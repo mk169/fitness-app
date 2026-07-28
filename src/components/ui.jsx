@@ -196,6 +196,12 @@ export const icons = {
       <path d="M10 12H3m0 0l3.5-3.5M3 12l3.5 3.5" />
     </Svg>
   ),
+  habits: (c) => (
+    <Svg className={c}>
+      <path d="M9 6h11M9 12h11M9 18h11" />
+      <path d="M3.5 6l1 1 2-2M3.5 12l1 1 2-2M3.5 18l1 1 2-2" />
+    </Svg>
+  ),
   einstellungen: (c) => (
     <Svg className={c}>
       <circle cx="12" cy="12" r="3" />
