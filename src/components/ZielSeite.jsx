@@ -6,6 +6,7 @@ import { SPLITS, standardTage, wendeSplitAn, planTag, normEintrag } from "../lib
 import { UEBUNGEN, KATEGORIEN, MUSKELGRUPPEN, uebungVon } from "../lib/uebungen"
 import { KONZEPTE, FASTEN_METHODEN, methodeVon, FARBEN } from "../lib/ernaehrung"
 import { FastenPhasen } from "./ErnaehrungsplanSeite"
+import Erfolge from "./Erfolge"
 import { Card, PageHeader, SectionTitle, Button, Pill, cx, inputCls } from "./ui"
 
 // Standard-Profil. Wird von Training und Ernährung gemeinsam genutzt und
@@ -128,6 +129,8 @@ export default function ZielSeite() {
         {/* Ergebnis des Algorithmus */}
         <Ergebnis plan={plan} />
       </div>
+
+      <Erfolge />
 
       <TrainingAnpassen profil={profil} setProfil={setProfil} />
       <ErnaehrungAnpassen />

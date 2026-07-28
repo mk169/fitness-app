@@ -1,8 +1,10 @@
+import { useState } from "react"
 import useStored from "../lib/useStored"
 import { heute } from "../lib/datum"
 import { datumLang } from "./Kalender"
 import { HabitTracker, ProgrammeSektion } from "./KalenderSeite"
 import { useZiel } from "./ZielSeite"
+import Wrapped from "./Wrapped"
 import { WOCHEN_KEYS, standardTage, tagesName, normEintrag } from "../lib/splits"
 import { uebungVon } from "../lib/uebungen"
 import { konzeptVon } from "../lib/ernaehrung"
@@ -17,13 +19,23 @@ function begruessung() {
 
 export default function Dashboard({ onNavigate, onStartTraining }) {
   const { plan } = useZiel()
+  const [wrappedOffen, setWrappedOffen] = useState(false)
 
   return (
     <div>
-      <p className="text-sm text-muted">{datumLang(heute())}</p>
-      <h1 className="mt-1 text-3xl font-bold tracking-tight text-ink">
-        {begruessung()}, <span className="text-gradient">Matthias</span>
-      </h1>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-sm text-muted">{datumLang(heute())}</p>
+          <h1 className="mt-1 text-3xl font-bold tracking-tight text-ink">
+            {begruessung()}, <span className="text-gradient">Matthias</span>
+          </h1>
+        </div>
+        <Button variant="subtle" onClick={() => setWrappedOffen(true)} className="shrink-0">
+          ✨ Wrapped
+        </Button>
+      </div>
+
+      {wrappedOffen && <Wrapped onClose={() => setWrappedOffen(false)} />}
 
       {/* 1. Tagesansicht: Habits nur anzeigen & abhaken */}
       <div className="mt-6">
