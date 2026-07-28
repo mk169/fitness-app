@@ -3,13 +3,29 @@
 //   2. FASTEN     – Methoden mit einem oder mehreren Essensfenstern.
 // Beides lässt sich frei kombinieren.
 
+// Jedes Konzept hat neben der Idee & den Prinzipien:
+//   wissenschaft – kurze, alltagsverständliche Einordnung der Studienlage
+//   staerken     – wofür es gut ist (ganzheitlich: Gesundheit, Alltag, Ziel)
+//   beachten     – worauf man achten sollte
+//   passtZu      – Ziel-Modi (siehe algorithmus.js), zu denen es besonders passt
 export const KONZEPTE = [
   {
     id: "standard",
     name: "Ausgewogen",
     kurz: "Standard",
     farbe: "gray",
-    idee: "Ausgewogene Mischkost nach deinen Makro-Zielen – kein Nahrungsmittel ist verboten.",
+    idee: "Ausgewogene Mischkost nach deinen Makro-Zielen – nichts ist verboten, du steuerst nur die Mengen.",
+    wissenschaft:
+      "Am besten belegt: Entscheidend fürs Ergebnis sind Kalorienbilanz und genug Protein – nicht das Weglassen einer Lebensmittelgruppe. Was du gut durchhältst, wirkt.",
+    staerken: [
+      "Flexibel & alltagstauglich – leicht durchzuhalten",
+      "Deckt automatisch alle Nährstoffe ab",
+      "Für jedes Ziel passend einstellbar",
+    ],
+    beachten: [
+      "Ohne feste Regeln braucht es etwas Eigensteuerung",
+    ],
+    passtZu: ["abnehmen", "schneller_cut", "halten", "zunehmen", "muskeln"],
     prinzipien: [
       "Makro-Ziele aus dem Algorithmus als Rahmen",
       "Viel Gemüse, ausreichend Protein",
@@ -21,7 +37,19 @@ export const KONZEPTE = [
     name: "Ray Peat",
     kurz: "Pro-metabolisch",
     farbe: "amber",
-    idee: "Stoffwechsel-orientiert nach Ray Peat: leicht verdauliche, sättigende Kost für Schilddrüse & Energie.",
+    idee: "Stoffwechsel-orientiert nach Ray Peat: leicht verdauliche, sättigende Kost, die Energie und Schilddrüse unterstützen soll.",
+    wissenschaft:
+      "Eher eine Philosophie als gut belegte Wissenschaft. Einzelne Ideen (genug essen, Zucker aus Obst statt Stärke) können sich stimmig anfühlen, harte Studienbelege fehlen aber.",
+    staerken: [
+      "Magenschonend & leicht verdaulich",
+      "Kann bei ständigem Frieren / niedriger Energie guttun",
+    ],
+    beachten: [
+      "Wenig wissenschaftlich abgesichert",
+      "Viel Zucker – Zähne & Blutzucker im Blick behalten",
+      "In strenger Diät eher ungünstig",
+    ],
+    passtZu: ["halten", "zunehmen"],
     prinzipien: [
       "Fructose & Saccharose aus reifem Obst, Saft, Honig",
       "Milch, Käse, Gelatine als Protein",
@@ -34,7 +62,20 @@ export const KONZEPTE = [
     name: "Keto",
     kurz: "< 30 g Carbs",
     farbe: "emerald",
-    idee: "Sehr kohlenhydratarm, fettbetont – Energie aus Ketonkörpern.",
+    idee: "Sehr kohlenhydratarm und fettbetont – der Körper zieht seine Energie aus Ketonkörpern statt aus Zucker.",
+    wissenschaft:
+      "Gut untersucht: Beim Abnehmen etwa gleich wirksam wie andere Diäten. Der eigentliche Vorteil liegt in starker Sättigung und ruhigem Blutzucker – nicht in „mehr Fettverbrennung“.",
+    staerken: [
+      "Starke Sättigung, wenig Heißhunger",
+      "Sehr stabiler Blutzucker",
+      "Therapeutisch belegt bei Epilepsie & Migräne",
+    ],
+    beachten: [
+      "Umstellung dauert 1–2 Wochen („Keto-Grippe“)",
+      "Elektrolyte & Ballaststoffe bewusst ergänzen",
+      "Maximale Kraft- & Sprintleistung kann leiden",
+    ],
+    passtZu: ["abnehmen", "schneller_cut", "halten"],
     prinzipien: [
       "< 20–30 g Kohlenhydrate pro Tag",
       "Hoher Fettanteil, moderates Protein",
@@ -46,7 +87,19 @@ export const KONZEPTE = [
     name: "High Protein",
     kurz: "proteinreich",
     farbe: "rose",
-    idee: "Proteinbetont – ideal in Diät (Sättigung) und Aufbau (Muskelerhalt).",
+    idee: "Proteinbetont – der stärkste Hebel, um in der Diät Muskeln zu halten und im Aufbau zuzulegen.",
+    wissenschaft:
+      "Sehr gut belegt: Viel Protein erhält Muskeln im Kaloriendefizit, sättigt am stärksten und ist die wichtigste Stellschraube für Muskelaufbau.",
+    staerken: [
+      "Schützt Muskeln im Defizit",
+      "Sättigt am besten von allen Nährstoffen",
+      "Passt zu praktisch jedem Konzept",
+    ],
+    beachten: [
+      "Genug Gemüse & Ballaststoffe nicht vergessen",
+      "Bei Nierenerkrankung ärztlich abklären",
+    ],
+    passtZu: ["abnehmen", "schneller_cut", "halten", "zunehmen", "muskeln"],
     prinzipien: [
       "≥ 2 g Protein pro kg Körpergewicht",
       "Mageres Fleisch, Fisch, Eier, Quark, Hülsenfrüchte",
@@ -58,7 +111,19 @@ export const KONZEPTE = [
     name: "Mediterran",
     kurz: "herzgesund",
     farbe: "sky",
-    idee: "Traditionelle Mittelmeerküche – die am besten untersuchte Ernährungsform für Herz-Kreislauf-Gesundheit und Langlebigkeit.",
+    idee: "Traditionelle Mittelmeerküche mit viel Gemüse, Olivenöl, Fisch und Hülsenfrüchten – genussvoll und alltagstauglich.",
+    wissenschaft:
+      "Die am besten erforschte Ernährung überhaupt – in großen Studien klar mit Herzgesundheit, weniger Entzündung und längerem Leben verbunden.",
+    staerken: [
+      "Top für Herz-Kreislauf & Langlebigkeit",
+      "Sehr nachhaltig und genussvoll",
+      "Entzündungshemmend, ballaststoffreich",
+    ],
+    beachten: [
+      "Portionen bei Öl & Nüssen im Blick behalten",
+      "Protein für Muskelziele ggf. gezielt erhöhen",
+    ],
+    passtZu: ["abnehmen", "halten", "muskeln"],
     prinzipien: [
       "Olivenöl als Hauptfettquelle, Nüsse & Samen",
       "Viel Gemüse, Hülsenfrüchte, Obst, Vollkorn",
@@ -71,7 +136,19 @@ export const KONZEPTE = [
     name: "Paleo",
     kurz: "unverarbeitet",
     farbe: "orange",
-    idee: "„Steinzeit-Ernährung“ – nur unverarbeitete Lebensmittel, keine Getreide, Milchprodukte oder Industriezucker.",
+    idee: "„Steinzeit-Ernährung“: vor allem Unverarbeitetes, ohne Getreide, Milchprodukte und Industriezucker.",
+    wissenschaft:
+      "Wenig Langzeitstudien. Die Erfolge kommen meist daher, dass verarbeitete Kost und Zucker wegfallen – nicht vom „Steinzeit“-Gedanken selbst.",
+    staerken: [
+      "Viel Unverarbeitetes ganz automatisch",
+      "Kaum Zucker & Fertigprodukte",
+    ],
+    beachten: [
+      "Ohne Vollkorn & Hülsenfrüchte fehlen günstige Ballaststoffe",
+      "Kalziumquelle ohne Milch mitdenken",
+      "Kann aufwändiger & teurer sein",
+    ],
+    passtZu: ["abnehmen", "halten"],
     prinzipien: [
       "Fleisch, Fisch, Eier, Gemüse, Obst, Nüsse",
       "Keine Getreideprodukte & Hülsenfrüchte",
@@ -84,7 +161,20 @@ export const KONZEPTE = [
     name: "Pflanzlich",
     kurz: "vegan",
     farbe: "lime",
-    idee: "Rein pflanzliche Kost – mit etwas Planung gut für Muskelaufbau und Gesundheit geeignet.",
+    idee: "Rein pflanzliche Kost – mit etwas Planung bestens für Gesundheit und Muskelaufbau geeignet.",
+    wissenschaft:
+      "Gut belegt für Herzgesundheit und niedrigere Entzündungswerte. Muskelaufbau klappt genauso gut, wenn Proteinmenge und -vielfalt stimmen.",
+    staerken: [
+      "Herzgesund & sehr ballaststoffreich",
+      "Ökologisch am nachhaltigsten",
+      "Viele schützende Pflanzenstoffe",
+    ],
+    beachten: [
+      "Vitamin B12 ist Pflicht zu supplementieren",
+      "Auf Eisen, Omega-3, Jod, Zink achten",
+      "Proteinquellen bewusst kombinieren",
+    ],
+    passtZu: ["abnehmen", "halten", "muskeln"],
     prinzipien: [
       "Proteinquellen: Hülsenfrüchte, Tofu, Tempeh, Seitan",
       "Vielfalt für alle essenziellen Aminosäuren",
@@ -97,7 +187,19 @@ export const KONZEPTE = [
     name: "Carnivore",
     kurz: "tierisch",
     farbe: "red",
-    idee: "Ausschließlich tierische Lebensmittel – maximal kohlenhydratarm, sehr eliminierend. Eher ein Experiment als Dauerlösung.",
+    idee: "Ausschließlich tierische Lebensmittel – maximal eliminierend. Eher ein kurzes Experiment als Dauerlösung.",
+    wissenschaft:
+      "Kaum Studien, viele offene Fragen. Kurzfristige Erfolge kommen meist vom Wegfall von Zucker & Fertigkost; Langzeitrisiken sind unklar.",
+    staerken: [
+      "Sehr stark sättigend",
+      "Als kurzes Ausschluss-Experiment nützlich",
+    ],
+    beachten: [
+      "Keine Ballaststoffe, wenig Vitamin C & Folsäure",
+      "Blutfette & Blutwerte regelmäßig checken",
+      "Für die meisten keine Dauerlösung",
+    ],
+    passtZu: ["halten"],
     prinzipien: [
       "Fleisch, Innereien, Fisch, Eier, etwas Butter",
       "Nahezu keine Kohlenhydrate",
@@ -110,7 +212,19 @@ export const KONZEPTE = [
     name: "Low Carb",
     kurz: "50–100 g Carbs",
     farbe: "teal",
-    idee: "Moderat kohlenhydratreduziert – flexibler als Keto, gut für Fettabbau und stabile Blutzuckerwerte.",
+    idee: "Moderat kohlenhydratreduziert – flexibler als Keto, gut für Fettabbau und ruhigen Blutzucker.",
+    wissenschaft:
+      "Gut belegt beim Abnehmen und für stabilere Blutzuckerwerte – und dabei leichter durchzuhalten als striktes Keto.",
+    staerken: [
+      "Gute Sättigung, weniger Heißhunger",
+      "Deutlich flexibler als Keto",
+      "Ruhiger Blutzucker",
+    ],
+    beachten: [
+      "Kohlenhydrate sinnvoll ums Training legen",
+      "Ballaststoffe aus Gemüse im Blick behalten",
+    ],
+    passtZu: ["abnehmen", "schneller_cut", "halten"],
     prinzipien: [
       "50–100 g Kohlenhydrate pro Tag",
       "Carbs vor allem rund ums Training",
@@ -123,7 +237,18 @@ export const KONZEPTE = [
     name: "Carb-Cycling",
     kurz: "Carbs wechseln",
     farbe: "violet",
-    idee: "Kohlenhydrate nach Trainingsbelastung steuern: viel an harten Tagen, wenig an Ruhetagen – Leistung trifft Fettabbau.",
+    idee: "Kohlenhydrate nach Belastung steuern: viel an harten Trainingstagen, wenig an Ruhetagen – Leistung trifft Fettabbau.",
+    wissenschaft:
+      "Wenig direkte Studien, aber die Idee ist plausibel: Carbs dann essen, wenn der Körper sie fürs Training am besten nutzt.",
+    staerken: [
+      "Energie fürs harte Training, Fettabbau an ruhigen Tagen",
+      "Abwechslung hält motiviert",
+    ],
+    beachten: [
+      "Erfordert Planung & etwas Tracking",
+      "Eher für Fortgeschrittene",
+    ],
+    passtZu: ["abnehmen", "muskeln", "halten"],
     prinzipien: [
       "High-Carb an intensiven Trainingstagen",
       "Low-Carb an Ruhe- & Cardio-Tagen",
