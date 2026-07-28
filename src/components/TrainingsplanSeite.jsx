@@ -10,6 +10,7 @@ import {
 } from "../lib/analytik"
 import { useZiel } from "./ZielSeite"
 import Koerperkarte from "./Koerperkarte"
+import Uebungsbibliothek, { UebungInfoButton } from "./Uebungsbibliothek"
 import { Card, PageHeader, SectionTitle, Button, cx, labelCls } from "./ui"
 
 // Trainingsplan-Seite = Trainings-Zentrale: was wird heute trainiert
@@ -86,6 +87,8 @@ export default function TrainingsplanSeite({ onZiel, autostart, onAutostartFerti
       <AnalyseSektion />
 
       <ProgressStatistik wochenplan={wochenplan} />
+
+      <Uebungsbibliothek />
     </div>
   )
 }
@@ -487,6 +490,7 @@ function SessionAnsicht({ eintraege, profil, einheitName, onEnde }) {
                 <span className="text-xs tabular-nums text-faint">
                   {e.saetze}×{e.wdh}{e.gewicht > 0 ? ` · ${e.gewicht} kg` : ""}
                 </span>
+                <UebungInfoButton id={e.id} />
               </li>
             ) : null
           })}
