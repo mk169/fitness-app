@@ -18,7 +18,7 @@ const NAV = [
   { key: "dashboard", label: "Dashboard", icon: icons.dashboard },
   { key: "training", label: "Training", icon: icons.training },
   { key: "ernaehrung", label: "Ernährung", icon: icons.ernaehrung },
-  { key: "kalender", label: "Kalender", icon: icons.kalender },
+  { key: "kalender", label: "Habits", icon: icons.habits },
   { key: "ziel", label: "Ziel", icon: icons.ziel },
   { key: "einstellungen", label: "Mehr", icon: icons.einstellungen },
 ]

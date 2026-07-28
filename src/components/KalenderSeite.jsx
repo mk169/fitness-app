@@ -1,21 +1,17 @@
 import { useMemo, useState } from "react"
 import useStored from "../lib/useStored"
 import { heute } from "../lib/datum"
-import { WOCHEN_KEYS } from "../lib/splits"
-import { FASTEN_STANDARD, phasenStatus } from "../lib/ernaehrung"
+import { FASTEN_STANDARD } from "../lib/ernaehrung"
 import {
   habitsAmTag, istErledigt, toggle, streak, tagesFortschritt,
   neuerHabit, farbeVon, HABIT_VORSCHLAEGE,
 } from "../lib/habits"
-import {
-  PROGRAMM_TYPEN, typInfo, programmStatus, aktiveProgramme,
-} from "../lib/programme"
-import Kalender, { schluessel, datumLang } from "./Kalender"
+import { PROGRAMM_TYPEN, typInfo, programmStatus } from "../lib/programme"
+import { schluessel, datumLang } from "./Kalender"
 import { Card, PageHeader, SectionTitle, Button, Ring, inputCls, labelCls, cx } from "./ui"
 
-// Kalender-Seite als Habit-Tracker: Tagesansicht zum Abhaken mit Streaks,
-// Phasen/Programme über Zeiträume und eine Monats-/Wochenübersicht, die den
-// Erledigt-Stand und laufende Programme anzeigt.
+// Seite „Habits & Programme": Tagesansicht zum Abhaken mit Streaks und
+// Phasen/Programme über Zeiträume (Timeline).
 
 // Gemeinsame Programm-Liste (eigene Programme + Fastenphasen als Bänder).
 function useProgramme() {
@@ -308,135 +304,16 @@ function Timeline({ items, heuteKey, onRemove }) {
   )
 }
 
-// ---- Kalender-Übersicht (Monat/Woche/Tag) mit Terminen ------------------
-export function KalenderPanel() {
-  const [wochenplan] = useStored("trainingsplanUebungen", {})
-  const [fastenPhasen] = useStored("fastenPhasen", [])
-  const [mahlzeiten] = useStored("mahlzeiten", [])
-  const [termine, setTermine] = useStored("kalenderTermine", [])
-  const [checks] = useStored("checks", {})
-  const [eigene] = useStored("habits", [])
-  const [fasten] = useStored("fasten", FASTEN_STANDARD)
-  const { alle: alleProgramme } = useProgramme()
-
-  const [formOffen, setFormOffen] = useState(false)
-  const [formTitel, setFormTitel] = useState("")
-  const [formDatum, setFormDatum] = useState(heute())
-  const [formZeit, setFormZeit] = useState("")
-  const [formDauer, setFormDauer] = useState("60")
-  const [formTyp, setFormTyp] = useState("training")
-
-  const ctx = { wochenplan, fastenMethode: fasten.methode }
-
-  function eintraegeAm(key) {
-    const wKey = WOCHEN_KEYS[(new Date(`${key}T00:00:00`).getDay() + 6) % 7]
-    const geplant = wochenplan[wKey] ?? []
-    return [
-      ...(geplant.length > 0 ? [{ typ: "training", label: `Training · ${geplant.length} Übungen` }] : []),
-      ...fastenPhasen
-        .map((p) => ({ p, s: phasenStatus(p, key) }))
-        .filter(({ s }) => s.status === "aktiv")
-        .map(({ p, s }) => ({ typ: "fasten", label: `${p.titel || "Fasten"} · Tag ${s.tag}/${p.tage}` })),
-      ...mahlzeiten.filter((m) => m.datum === key).map((m) => ({ typ: "mahlzeit", label: m.titel, zeit: m.zeit })),
-      ...termine
-        .filter((t) => t.datum === key)
-        .map((t) => ({
-          typ: t.typ === "training" ? "training" : t.typ === "mahlzeit" ? "mahlzeit" : "termin",
-          label: t.titel, zeit: t.zeit, dauer: t.dauer,
-          onRemove: () => setTermine(termine.filter((x) => x.id !== t.id)),
-        })),
-    ].sort((a, b) => (a.zeit || "99:99").localeCompare(b.zeit || "99:99"))
-  }
-
-  const tagStatus = (key) => tagesFortschritt(checks, key, habitsAmTag(key, ctx, eigene))
-  const baender = (key) =>
-    aktiveProgramme(alleProgramme, key).map((p) => ({ name: p.name, farbe: typInfo(p.typ).farbe }))
-
-  function addTermin(e) {
-    e.preventDefault()
-    if (!formTitel.trim()) return
-    setTermine([
-      ...termine,
-      {
-        id: Date.now(), titel: formTitel.trim(), datum: formDatum, zeit: formZeit,
-        dauer: formZeit && formDauer ? Number(formDauer) : null, typ: formTyp,
-      },
-    ])
-    setFormTitel("")
-    setFormZeit("")
-    setFormDauer("60")
-    setFormTyp("training")
-    setFormOffen(false)
-  }
-
-  return (
-    <Card className="p-5">
-      {formOffen && (
-        <form onSubmit={addTermin} className="mb-4 rounded-xl border border-[color:var(--ov-06)] bg-surface-2 p-4">
-          <input
-            value={formTitel}
-            onChange={(e) => setFormTitel(e.target.value)}
-            placeholder="Was steht an? (z. B. Push-Training, Refeed …)"
-            autoFocus
-            className="w-full rounded-lg border border-[color:var(--ov-10)] bg-surface px-4 py-3 text-lg font-medium text-ink outline-none transition-colors placeholder:text-faint focus:border-accent focus:ring-2 focus:ring-accent/30"
-          />
-          <div className="mt-3 flex flex-wrap items-end gap-2">
-            <label className={labelCls}>
-              Art
-              <select value={formTyp} onChange={(e) => setFormTyp(e.target.value)} className={inputCls}>
-                <option value="training">Training</option>
-                <option value="mahlzeit">Ernährung</option>
-                <option value="termin">Sonstiges</option>
-              </select>
-            </label>
-            <label className={labelCls}>
-              Datum
-              <input type="date" value={formDatum} onChange={(e) => setFormDatum(e.target.value)} className={inputCls} />
-            </label>
-            <label className={labelCls}>
-              Uhrzeit
-              <input type="time" value={formZeit} onChange={(e) => setFormZeit(e.target.value)} className={inputCls} />
-            </label>
-            <label className={labelCls}>
-              Dauer (Min.)
-              <input type="number" min="15" step="15" value={formDauer} onChange={(e) => setFormDauer(e.target.value)} className={inputCls} />
-            </label>
-            <Button type="submit">Speichern</Button>
-            <Button type="button" variant="ghost" onClick={() => setFormOffen(false)}>Abbrechen</Button>
-          </div>
-        </form>
-      )}
-
-      <Kalender
-        eintraegeAm={eintraegeAm}
-        legende={["training", "mahlzeit", "fasten", "termin"]}
-        tagStatus={tagStatus}
-        baender={baender}
-        onNeu={(datum) => {
-          setFormDatum(datum)
-          setFormOffen(true)
-        }}
-      />
-    </Card>
-  )
-}
-
 export default function KalenderSeite() {
   return (
     <div>
       <PageHeader
-        title="Habits & Kalender"
-        subtitle="Täglich abhaken, Serien halten, Phasen & Programme über die Zeit festhalten."
+        title="Habits & Programme"
+        subtitle="Täglich abhaken, Serien halten und Phasen & Programme über die Zeit festhalten."
       />
       <div className="mt-6 space-y-2">
         <HabitTracker />
         <ProgrammeSektion />
-        <section className="mt-8">
-          <SectionTitle>Übersicht</SectionTitle>
-          <div className="mt-3">
-            <KalenderPanel />
-          </div>
-        </section>
       </div>
     </div>
   )
