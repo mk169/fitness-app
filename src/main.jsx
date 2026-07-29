@@ -8,3 +8,11 @@ createRoot(document.getElementById('root')).render(
     <App />
   </StrictMode>,
 )
+
+// Service Worker nur in Produktion registrieren (stört sonst die Dev-HMR).
+// BASE_URL berücksichtigt den Unterpfad-Deploy (/fitness-app/).
+if ('serviceWorker' in navigator && import.meta.env.PROD) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`).catch(() => {})
+  })
+}
